@@ -26,6 +26,7 @@ header_pages:
   - projects.md
   - teaching.md
   - resume.md
+  - notes.md
 # Build settings
 markdown: kramdown
 theme: minima
