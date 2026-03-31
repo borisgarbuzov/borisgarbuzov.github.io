@@ -37,7 +37,7 @@
 \newcommand{\Leb}{\mathrm{Leb}}
 \newcommand{\Range}{\mathrm{Range}}
 
-\title{\textbf{Foundations of Generalised Linear Models, v10}\\
+\title{\textbf{Foundations of Generalised Linear Models, v11}\\
 \large From Conditional Expectation to Logistic Regression}
 \author{B.~Garbuzov\\[4pt]
 {\small Technical notes, 2026}}
@@ -222,23 +222,8 @@ R--N derivative $h=d\nu/d\Prob_X$ is a $\Prob_X$-integrable function
 with no $\infty-\infty$ ambiguity.  The assumption $\E|Y|<\infty$ is
 not a technicality: it is the exact condition needed to make the
 signed measure $\nu$ well-posed.
-
-\medskip
-\textbf{References.}
-\begin{itemize}[itemsep=2pt]
-  \item P.~Halmos, \textit{Measure Theory} (1950), Chapter~VI:
-    classical treatment of Hahn and Jordan decompositions.
-  \item W.~Rudin, \textit{Real and Complex Analysis}, 3rd ed.\
-    (1987), Theorem~6.12: R--N theorem for complex (hence signed)
-    measures; finiteness conditions discussed explicitly.
-  \item V.~Bogachev, \textit{Measure Theory}, Vol.~1 (2007),
-    \S3.10: modern treatment including the $\sigma$-finite case
-    and subtleties of the signed setting.
-  \item N.~Dunford \& J.T.~Schwartz,
-    \textit{Linear Operators}, Vol.~1 (1958), III.7:
-    signed measures as elements of the dual of $C_0$;
-    functional-analytic perspective.
-\end{itemize}
+See the References section for classical treatments of
+Hahn--Jordan decomposition and the R--N theorem for signed measures.
 \end{remark}
 
 \begin{theorem}[Existence, uniqueness, properties]\label{thm:RNexist}
@@ -758,5 +743,54 @@ $\expit$, $\logit$ & logistic and logit \\
 IRLS & iteratively reweighted least squares \\
 R--N & Radon--Nikodym \\
 \end{tabular}
+
+\section{References}
+
+\begin{itemize}[itemsep=6pt]
+  \item P.~Halmos, \textit{Measure Theory}, Van Nostrand, 1950.
+    Chapter~VI: Hahn and Jordan decompositions of signed measures.
+
+  \item W.~Rudin, \textit{Real and Complex Analysis}, 3rd ed.,
+    McGraw-Hill, 1987.
+    Theorem~6.12: Radon--Nikodym theorem for complex (hence signed)
+    measures; finiteness conditions discussed explicitly.
+
+  \item V.~Bogachev, \textit{Measure Theory}, Vol.~1,
+    Springer, 2007.
+    \S3.10: modern treatment of the $\sigma$-finite case
+    and subtleties of signed measures.
+
+  \item N.~Dunford \& J.T.~Schwartz,
+    \textit{Linear Operators}, Vol.~1,
+    Interscience, 1958.
+    III.7: signed measures as elements of the dual of $C_0$;
+    functional-analytic perspective.
+
+  \item R.~Galton, ``Regression towards mediocrity in hereditary
+    stature,'' \textit{Journal of the Anthropological Institute},
+    15:246--263, 1886.
+    (Origin of the term ``regression.'')
+
+  \item A.N.~Kolmogorov, \textit{Grundbegriffe der
+    Wahrscheinlichkeitsrechnung}, Springer, 1933.
+    Formalisation of conditional expectation as a
+    Radon--Nikodym density.
+
+  \item P.~McCullagh \& J.A.~Nelder,
+    \textit{Generalized Linear Models}, 2nd ed.,
+    Chapman \& Hall, 1989.
+    Standard reference for GLM theory, exponential families,
+    canonical links, and IRLS.
+
+  \item H.~White, ``Maximum likelihood estimation of misspecified
+    models,'' \textit{Econometrica}, 50(1):1--25, 1982.
+    Consistency of MLE under misspecification; sandwich
+    standard errors.
+
+  \item R.W.M.~Wedderburn, ``Quasi-likelihood functions,
+    generalized linear models, and the Gauss--Newton method,''
+    \textit{Biometrika}, 61(3):439--447, 1974.
+    Quasi-likelihood and the role of the variance function.
+\end{itemize}
 
 \end{document}

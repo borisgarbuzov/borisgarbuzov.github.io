@@ -17,8 +17,8 @@ The surface f(x,θ) as a single object with two readings. Gaussian, Bernoulli an
 
 Two approaches to the regression function: Radon–Nikodym derivative and conditional expectation. Their equivalence. Optimality, signed measures, and the GLM framework. Canonical links and IRLS.
 
-[PDF](/assets/pdf/papers/glm_foundations_git_v10.pdf)
-[TeX Source](/assets/pdf/papers/glm_foundations_git_v10.tex)
+[PDF](/assets/pdf/papers/glm_foundations_git_v11.pdf)
+[TeX Source](/assets/pdf/papers/glm_foundations_git_v11.tex)
 
 #### Stochastic Analysis
 
