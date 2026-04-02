@@ -4,11 +4,23 @@ title: Projects
 permalink: /projects/
 ---
 
-**Project 1. Simultaneous  confidence band.** [Github repository](https://github.com/borisgarbuzov/nscb2)
+**Project 1. Mortgage vs Rent.** [Github repository](https://github.com/borisgarbuzov/mortgage-vs-rent)
+
+<div class="row">
+  <div class="column">
+    <img src="/assets/images/mortgage-vs-rent/mortgage-vs-rent-1.png" style="width:100%">
+  </div>
+  <div class="column">
+    <img src="/assets/images/mortgage-vs-rent/mortgage-vs-rent-2.png" style="width:100%">
+  </div>
+</div>
+
+**Project 2. Simultaneous confidence band.** [Github repository](https://github.com/borisgarbuzov/nscb2)
+
 - In my first project of statistics Ph.D.,
-I implemented Zhao's confidence band for autocorrelation.
-The coverage frequency matched the target confidence level better with
-sample size increase.
+  I implemented Zhao's confidence band for autocorrelation.
+  The coverage frequency matched the target confidence level better with
+  sample size increase.
 
 <div class="row">
   <div class="column">
@@ -24,11 +36,12 @@ sample size increase.
 
 <br>
 
-**Project 2. Newey-West vs threshold LRV estimate** [Github repository](https://github.com/borisgarbuzov/nw-vs-t)
+**Project 3. Newey-West vs threshold LRV estimate** [Github repository](https://github.com/borisgarbuzov/nw-vs-t)
+
 - In my second project of statistics Ph.D.,
-I experimentally compared the threshold LRV estimate to the industry
-standard Newey-West.
-In my experimental cases the threshold estimator converged faster.
+  I experimentally compared the threshold LRV estimate to the industry
+  standard Newey-West.
+  In my experimental cases the threshold estimator converged faster.
 
 <div class="row">
   <div class="column">
@@ -41,9 +54,10 @@ In my experimental cases the threshold estimator converged faster.
 
 <br>
 
-**Project 3. Visualization**
+**Project 4. Visualization**
+
 - Images of data visualization, taken from the different projects.
-[Visualization examples expanded view]({% link visualization.md %})
+  [Visualization examples expanded view]({% link visualization.md %})
 
 <div class="row">
   <div class="column">
@@ -83,16 +97,17 @@ In my experimental cases the threshold estimator converged faster.
 
 <br>
 
-**Project 4. Analysis of observational data on myorelaxant comparison**
+**Project 5. Analysis of observational data on myorelaxant comparison**
+
 - This project comprises analysis of the experiment,
-designed and conducted by a hospital.
-For two years the hospital collected the observational data on surgeries of
-120 patients with 60 parameter measurements on each.
-The purpose was to compare the recovery time assisted by bridion against the
-one assisted by neostigmine and the spontaneous recovery in context of two
-relaxants – rocuronium and pipecuronium. The parameters included the main
-demographic and health state variables with the primary focus on the recovery
-time
+  designed and conducted by a hospital.
+  For two years the hospital collected the observational data on surgeries of
+  120 patients with 60 parameter measurements on each.
+  The purpose was to compare the recovery time assisted by bridion against the
+  one assisted by neostigmine and the spontaneous recovery in context of two
+  relaxants – rocuronium and pipecuronium. The parameters included the main
+  demographic and health state variables with the primary focus on the recovery
+  time
 
 <div class="row">
   <div class="column">
@@ -105,8 +120,9 @@ time
 
 <br>
 
-**Project 5. CanadaPost** [Github repository](https://github.com/borisgarbuzov/Canadapost)
-- This report is requested by Canada Post HR department to select a candidate for the data scientist position. It is conducted within a week of time. The purpose of the investigation is to study the influence of strike in 2018 onto volume of CanadaPost operations, along with the associated events, including mass media messages.  
+**Project 6. CanadaPost** [Github repository](https://github.com/borisgarbuzov/Canadapost)
+
+- This report is requested by Canada Post HR department to select a candidate for the data scientist position. It is conducted within a week of time. The purpose of the investigation is to study the influence of strike in 2018 onto volume of CanadaPost operations, along with the associated events, including mass media messages.
 
 <div class="row">
   <div class="column">
@@ -119,11 +135,12 @@ time
 
 <br>
 
-**Project 6. WTI Spot Price FOB (Dollars per Barrel).** [Kaggle notebook](https://www.kaggle.com/code/statistics101guy/assignment-solution)
+**Project 7. WTI Spot Price FOB (Dollars per Barrel).** [Kaggle notebook](https://www.kaggle.com/code/statistics101guy/assignment-solution)
+
 - Simulate and forecast oil prices with ARIMA model.
 - Forecast Brent oil prices in 2021, based on historical data of 1958-2020.
 - Use trend extraction by regression on time, and ARIMA fit for the residuals.
-- Evaluate the forecast performance metrics.  
+- Evaluate the forecast performance metrics.
 
 <div class="row">
   <div class="column">
