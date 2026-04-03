@@ -8,9 +8,9 @@ permalink: /projects/
 
 - A Jupyter notebook calculator with numeric and graphical output.
   No external data required — works out of the box.
-  Enter your parameters by hand and explore 12 sections of plots covering
-  variables like mortgage rate, appreciation rate, down payment, and monthly
-  rent. Requires pandas, numpy, and matplotlib.
+  Enter your parameters by hand, like mortgage rate, appreciation rate, down payment, and monthly
+  rent, and explore 12 sections of plots covering
+  variables ...  Requires pandas, numpy, and matplotlib.
 
 <div class="row">
   <div class="column">
