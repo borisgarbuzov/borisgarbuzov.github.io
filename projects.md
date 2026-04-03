@@ -5,13 +5,12 @@ permalink: /projects/
 ---
 
 **Project 1. Mortgage vs Rent.** [Github repository](https://github.com/borisgarbuzov/mortgage-vs-rent)
-It is a calculator with numeric and graphical output. 
-Jupyter notebook.
-Does not read any data. Works out of the box. 
-Enter your numbers by hand, and read around 12 sections with plots.
-Need to install pandas, numpy and matplotlib.
 
-
+- A Jupyter notebook calculator with numeric and graphical output.
+  No external data required — works out of the box.
+  Enter your parameters by hand and explore 12 sections of plots covering
+  variables like mortgage rate, appreciation rate, down payment, and monthly
+  rent. Requires pandas, numpy, and matplotlib.
 
 <div class="row">
   <div class="column">
