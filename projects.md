@@ -6,11 +6,9 @@ permalink: /projects/
 
 **Project 1. Mortgage vs Rent.** [Github repository](https://github.com/borisgarbuzov/mortgage-vs-rent)
 
-- A Jupyter notebook calculator with numeric and graphical output.
-  No external data required — works out of the box.
-  Enter your parameters by hand, like mortgage rate, appreciation rate, down payment, and monthly
-  rent, and explore 12 sections of plots covering
-  variables ...  Requires pandas, numpy, and matplotlib.
+- A realtor tried to convince me to buy a Toronto condo and I couldn't find
+  anything online that actually did the math. So I built this — set your own
+  assumptions, and see which option comes out ahead in present value terms.
 
 <div class="row">
   <div class="column">
