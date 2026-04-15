@@ -33,5 +33,19 @@ Two strategies for converting between distributions: changing the map (pushforwa
 
 Limit and supremum definitions of p-variation. Examples with step functions. The role of p relative to 1: subadditive vs. superadditive behaviour.
 
+[Read on site]({% link p-variation.md %})
 [PDF](/assets/pdf/papers/p_variation_git_v1.pdf)
 [TeX Source](/assets/pdf/papers/p_variation_git_v1.tex)
+
+**5. Cohort component**
+
+These working notes establish the formal connection between cohort component
+methods and linear time-series analysis, showing that under constant attrition
+and inflow rates, the standard cohort recursion is algebraically equivalent to
+an AR(1) or VAR(1) model. The notes cover the set-theoretic foundations of the
+accounting identity, long-run equilibrium analysis, age-profile estimation from
+historical data, and the statistical basis for point prediction under mean
+squared error.
+
+[PDF](/assets/pdf/papers/cohort_component_v12.pdf)
+[TeX Source](/assets/pdf/papers/cohort_component_v12.tex)
