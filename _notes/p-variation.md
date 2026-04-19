@@ -1,7 +1,6 @@
 ---
 layout: page
 title: Notes on \(p\)-variation
-permalink: /p-variation/
 ---
 
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>

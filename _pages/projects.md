@@ -61,7 +61,7 @@ permalink: /projects/
 **Project 4. Visualization**
 
 - Images of data visualization, taken from the different projects.
-  [Visualization examples expanded view]({% link visualization.md %})
+  [Visualization examples expanded view]({% link _pages/visualization.md %})
 
 <div class="row">
   <div class="column">

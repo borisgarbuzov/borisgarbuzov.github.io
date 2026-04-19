@@ -23,15 +23,21 @@ github_username: borisgarbuzov
 linkedin_username: boris-garbuzov
 schulich: "https://schulich.yorku.ca/faculty/boris-garbuzov/"
 header_pages:
-  - projects.md
-  - teaching.md
-  - resume.md
-  - notes.md
+  - _pages/projects.md
+  - _pages/teaching.md
+  - _pages/resume.md
+  - _pages/notes.md
 # Build settings
 markdown: kramdown
 theme: minima
 plugins:
   - jekyll-feed
+include:
+  - _pages
+collections:
+  notes:
+    output: true
+    permalink: /notes/:name/
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
