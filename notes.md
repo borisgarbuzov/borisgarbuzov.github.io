@@ -45,7 +45,7 @@ and inflow rates, the standard cohort recursion is algebraically equivalent to
 an AR(1) or VAR(1) model. The notes cover the set-theoretic foundations of the
 accounting identity, long-run equilibrium analysis, age-profile estimation from
 historical data, and the statistical basis for point prediction under mean
-squared error.
+squared error. Besides, notes cover some forecast foundations, comparing them to the statistical inference problem. 
 
-[PDF](/assets/pdf/papers/cohort_component_v12.pdf)
-[TeX Source](/assets/pdf/papers/cohort_component_v12.tex)
+[PDF](/assets/pdf/papers/cohort_component.pdf)
+[TeX Source](/assets/pdf/papers/cohort_component.tex)
