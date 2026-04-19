@@ -47,5 +47,6 @@ accounting identity, long-run equilibrium analysis, age-profile estimation from
 historical data, and the statistical basis for point prediction under mean
 squared error. Besides, notes cover some forecast foundations, comparing them to the statistical inference problem.
 
+[Read on site]({% link _notes/cohort-component.md %})
 [PDF](/assets/papers/cohort_component.pdf)
 [TeX Source](/assets/papers/cohort_component.tex)
