@@ -50,3 +50,26 @@ squared error. Besides, notes cover some forecast foundations, comparing them to
 [Read on site]({% link _notes/cohort-component.md %})
 [PDF](/assets/papers/cohort_component.pdf)
 [TeX Source](/assets/papers/cohort_component.tex)
+
+**6. MV Interview Prep — Question List + KS Test**
+
+Notes from a conversation with a friend who works in model validation at a Canadian bank — the question list he uses when interviewing MV candidates, plus my own worked discussion of one item (the Kolmogorov–Smirnov test).
+
+- [PDF](/assets/papers/mv_interview_prep_v16.pdf)
+- [TeX Source](/assets/papers/mv_interview_prep_v16.tex)
+- [Notebook](/assets/code/KS_test.ipynb) (full runnable simulation with plots, used for Section 9)
+
+**What's in the PDF**
+
+- **Sections 2–7:** the question list — linear regression assumptions, logistic regression, hypothesis testing, foundational probability, the structure of an MV project.
+- **Section 8:** the mathematical skeleton of statistical testing — test as a Bernoulli-valued statistic, Type I/II errors, simple vs. composite hypotheses, pivots.
+- **Section 9:** the KS test — the distribution-free property at finite n, the two convergence results, decision regimes, a worked example, simulation code.
+- **Section 10:** quick reference table for regression diagnostics.
+
+**What's in the notebook**
+
+`KS_test.ipynb` is the full runnable version of the simulation sketched in Section 9.6 of the PDF: empirical CDF, KS statistic, Brownian bridge, KS random variable, KS CDF — plus plots of the empirical-vs-theoretical CDF, the simulated KS distribution (CDF and histogram), and a convergence check at n = 10, 100, 1000.
+
+**What I'm working on now**
+
+A fuller treatment of homoscedasticity and the Breusch–Pagan test. That will likely be the next document in this series.
