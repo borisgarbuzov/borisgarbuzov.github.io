@@ -23,7 +23,7 @@ Limit and supremum definitions of p-variation. Examples with step functions. The
 - [TeX Source](/assets/papers/p_variation_git_v1.tex)
 
 
-## 2. Model validation interview questions and on
+## 2. Model validation interview prep
 
 ### 2.1. MV interview prep — question list + KS test
 
