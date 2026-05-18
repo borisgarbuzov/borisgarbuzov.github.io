@@ -4,34 +4,17 @@ title: Notes
 permalink: /notes/
 ---
 
-## 1. Probability &amp; Statistics — Foundations
+## 1. FRM preparation. Elements of math finance and stochastic calculus.
 
-### 1.1. Likelihood: from first principles
 
-The surface f(x,θ) as a single object with two readings. Gaussian, Bernoulli and Poisson families. Triangular and sigmoidal likelihood fences. Fisher information and score function.
-
-- [PDF](/assets/papers/likelihood_git_v10.pdf)
-- [TeX Source](/assets/papers/likelihood_git_v10.tex)
-
-### 1.2. Foundations of Generalised Linear Models
-
-Two approaches to the regression function: Radon–Nikodym derivative and conditional expectation. Their equivalence. Optimality, signed measures, and the GLM framework. Canonical links and IRLS.
-
-- [PDF](/assets/papers/glm_foundations_git_v11.pdf)
-- [TeX Source](/assets/papers/glm_foundations_git_v11.tex)
-
----
-
-## 2. Stochastic Analysis
-
-### 2.1. Converting between Gaussian and lognormal families: a bridge to Girsanov's theorem
+### 1.1. Converting between Gaussian and lognormal families: a bridge to Girsanov's theorem
 
 Two strategies for converting between distributions: changing the map (pushforward) vs. reweighting the measure (Radon–Nikodym). Worked through for normal and lognormal families, then lifted to Girsanov's theorem and geometric Brownian motion.
 
 - [PDF](/assets/papers/girsanov_bridge_git_v7.pdf)
 - [TeX Source](/assets/papers/girsanov_bridge_git_v7.tex)
 
-### 2.2. Notes on p-variation
+### 1.2. Notes on p-variation
 
 Limit and supremum definitions of p-variation. Examples with step functions. The role of p relative to 1: subadditive vs. superadditive behaviour.
 
@@ -39,25 +22,10 @@ Limit and supremum definitions of p-variation. Examples with step functions. The
 - [PDF](/assets/papers/p_variation_git_v1.pdf)
 - [TeX Source](/assets/papers/p_variation_git_v1.tex)
 
----
 
-## 3. Miscellaneous
+## 2. Model validation interview questions and on
 
-### 3.1. Cohort component
-
-These working notes establish the formal connection between cohort component
-methods and linear time-series analysis, showing that under constant attrition
-and inflow rates, the standard cohort recursion is algebraically equivalent to
-an AR(1) or VAR(1) model. The notes cover the set-theoretic foundations of the
-accounting identity, long-run equilibrium analysis, age-profile estimation from
-historical data, and the statistical basis for point prediction under mean
-squared error. Besides, notes cover some forecast foundations, comparing them to the statistical inference problem.
-
-- [Read on site]({% link _notes/cohort-component.md %})
-- [PDF](/assets/papers/cohort_component.pdf)
-- [TeX Source](/assets/papers/cohort_component.tex)
-
-### 3.2. MV Interview Prep — Question List + KS Test
+### 2.1. MV interview prep — question list + KS test
 
 Notes from a conversation with a friend who works in model validation at a Canadian bank — the question list he uses when interviewing MV candidates, plus my own worked discussion of one item (the Kolmogorov–Smirnov test).
 
@@ -75,6 +43,39 @@ Notes from a conversation with a friend who works in model validation at a Canad
 **What's in the notebook**
 
 `KS_test.ipynb` is the full runnable version of the simulation sketched in Section 9.6 of the PDF: empirical CDF, KS statistic, Brownian bridge, KS random variable, KS CDF — plus plots of the empirical-vs-theoretical CDF, the simulated KS distribution (CDF and histogram), and a convergence check at n = 10, 100, 1000.
+
+
+### 2.2. Likelihood: from first principles
+
+The surface f(x,θ) as a single object with two readings. Gaussian, Bernoulli and Poisson families. Triangular and sigmoidal likelihood fences. Fisher information and score function.
+
+- [PDF](/assets/papers/likelihood_git_v10.pdf)
+- [TeX Source](/assets/papers/likelihood_git_v10.tex)
+
+### 2.3. Foundations of generalised linear models (GLM)
+
+Two approaches to the regression function: Radon–Nikodym derivative and conditional expectation. Their equivalence. Optimality, signed measures, and the GLM framework. Canonical links and IRLS.
+
+- [PDF](/assets/papers/glm_foundations_git_v11.pdf)
+- [TeX Source](/assets/papers/glm_foundations_git_v11.tex)
+
+
+
+## 3. Forecasting
+
+### 3.1. Cohort component
+
+These working notes establish the formal connection between cohort component
+methods and linear time-series analysis, showing that under constant attrition
+and inflow rates, the standard cohort recursion is algebraically equivalent to
+an AR(1) or VAR(1) model. The notes cover the set-theoretic foundations of the
+accounting identity, long-run equilibrium analysis, age-profile estimation from
+historical data, and the statistical basis for point prediction under mean
+squared error. Besides, notes cover some forecast foundations, comparing them to the statistical inference problem.
+
+- [Read on site]({% link _notes/cohort-component.md %})
+- [PDF](/assets/papers/cohort_component.pdf)
+- [TeX Source](/assets/papers/cohort_component.tex)
 
 **What I'm working on now**
 
