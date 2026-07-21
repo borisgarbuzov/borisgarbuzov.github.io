@@ -1,0 +1,1327 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\mbF}{\mathcal{F}}
+\newcommand*{\ve}{\varepsilon}
+
+
+
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~8~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries The Envelope Theorem\\and a Historical Note on Score vs LM}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+\section{The Envelope Theorem and Its Use in the LM Test}
+\label{sec:envelope_lm}
+
+\subsection{The envelope theorem in the simplest possible case}
+\label{subsec:envelope_simple}
+%--------------------------------------------------------------------
+
+Before using the envelope theorem to generalise the shadow-price
+finding, we state and prove it in the most elementary setting:
+an \emph{unconstrained} one-variable maximisation with a parameter.
+
+\paragraph{Setup.}
+Let $f(x,c)$ be a smooth function of two variables, $x$ the variable
+being optimised and $c$ a parameter.  For each $c$, let
+\[
+  x^*(c) = \arg\max_x f(x,c), \qquad
+  V(c) = f(x^*(c), c) = \max_x f(x,c)
+\]
+be the maximiser and the resulting maximal value (the
+\emph{value function}).  Assume $x^*(c)$ is differentiable in $c$.
+
+\paragraph{Question.} How does $V(c)$ change as $c$ changes?
+Naively, $V$ depends on $c$ in two ways: directly through the
+second argument of $f$, and indirectly because the maximiser
+$x^*(c)$ itself shifts.  The envelope theorem says the second
+channel contributes nothing.
+
+\begin{quote}
+\textbf{Envelope theorem (elementary form).}
+\[
+  V'(c) = \frac{\partial f}{\partial c}\Big(x^*(c), c\Big).
+\]
+The total derivative of $V$ equals the \emph{partial} derivative of
+$f$ with respect to $c$, evaluated at the optimum --- with no
+correction term for $dx^*/dc$.
+\end{quote}
+
+\begin{proof}
+By the chain rule,
+\[
+  V'(c) = \frac{\partial f}{\partial x}\big(x^*(c),c\big)\cdot
+  \frac{dx^*}{dc} + \frac{\partial f}{\partial c}\big(x^*(c),c\big).
+\]
+Since $x^*(c)$ maximises $f(\cdot,c)$, the first-order condition
+gives $\partial f/\partial x\,(x^*(c),c) = 0$.  The first term
+vanishes, leaving $V'(c) = \partial f/\partial c\,(x^*(c),c)$.
+\end{proof}
+
+\paragraph{Worked example.}
+Let $f(x,c) = -(x-c)^2 + c$.  For fixed $c$, this is maximised at
+$x^*(c) = c$, giving $V(c) = f(c,c) = c$.  Direct differentiation:
+$V'(c) = 1$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.68\textwidth]{fig_env_parabolas2d.png}
+  \caption{Three sections of $f(x,c)=-(x-c)^2+c$ at $c=0,1,2$
+  (red, blue, green): $-(x-0)^2+0$, $-(x-1)^2+1$, $-(x-2)^2+2$.
+  Each parabola peaks at $x^*=c$ with peak height $V(c)=c$:
+  the peaks trace out the line $V(c)=c$ as $c$ varies, visibly
+  rising by one unit for each unit step in $c$.}
+\end{figure}
+
+Now check via the envelope theorem without re-deriving $x^*(c)$:
+$\partial f/\partial c = 2(x-c) + 1$.  Evaluated at $x = x^*(c) = c$:
+$2(c-c)+1 = 1$.  Matches.  The term $2(x-c)$, which would carry the
+effect of $x^*$ shifting, evaluates to exactly zero at the optimum
+--- this is the first-order condition doing its job.
+
+\paragraph{On the definition of $V$ and where it can fail.}
+A precise statement of $V$ is worth pausing on:
+\[
+  V(c) = \max_x f(x,c) = f(x^*(c), c).
+\]
+If $x^*(c)$ is not defined at some $c=c_0$ (no maximiser exists, or
+it is not unique and we have not specified a selection rule), then
+$V(c_0)$ is simply not defined either, and the envelope-theorem
+formula cannot be applied there.  The theorem is a statement about
+differentiating $V$ \emph{where $V$ is well-defined and
+differentiable} --- it presupposes, rather than establishes,
+the existence and smoothness of $x^*(\cdot)$ near $c_0$.  In our
+example this is not an issue: $f(x,c)=-(x-c)^2+c$ is a downward
+parabola in $x$ for every $c$, so $x^*(c)=c$ exists and is unique
+and smooth everywhere.
+
+\paragraph{The geometry in 3-d.}
+The same example lets us see the envelope theorem geometrically.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_env_surface3d.png}
+  \caption{The surface $z=f(x,c)=-(x-c)^2+c$ over the $(x,c)$ plane.
+  Every cross-section at fixed $c$ (a slice parallel to the $x$-axis)
+  is a downward parabola; its peak lies along the ridge
+  $x=c$.  The value function $V(c)$ is the height of this ridge,
+  read off as the curve traced by the peaks as $c$ varies --- the
+  ``envelope'' of the family of parabolic sections, which gives the
+  theorem its name.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.6\textwidth]{fig_env_levellines.png}
+  \caption{Contour (level-line) plot of $f(x,c)=-(x-c)^2+c$ in the
+  $(c,x)$ plane.  The ridge line $x=c$ (where each $c$-section
+  attains its maximum) appears as the locus where the contours are
+  tangent to vertical lines $c=\mathrm{const}$ --- i.e.\ where
+  $\partial f/\partial x=0$.  Along this ridge, the contour values
+  increase steadily with $c$, visibly confirming $V(c)=c$.}
+\end{figure}
+
+\paragraph{Interpretation.}
+At the optimum, $f$ is locally flat in the $x$-direction (that is
+what ``optimum'' means).  So a small perturbation of $c$ changes
+$V$ exactly as if $x^*$ had stayed put: the indirect effect through
+$x^*(c)$ is a second-order (negligible) correction, not a
+first-order one.  This is the entire content of the theorem, and
+it generalises unchanged to the constrained case via the
+Lagrangian, as we use next.
+
+%--------------------------------------------------------------------
+\subsection{An operator viewpoint, and a graphical proof of the equality}
+\label{subsec:envelope_operator}
+%--------------------------------------------------------------------
+
+\paragraph{Two natural operators.}
+Define two operators acting on functions $f(x,c)$ of two variables:
+\[
+  D_c : f \mapsto \frac{\partial f}{\partial c}
+  \qquad\text{(partial differentiation in $c$)},
+  \qquad
+  M_x : f \mapsto \max_x f(x,\cdot)
+  \qquad\text{(maximise out $x$, leaving a function of $c$)}.
+\]
+Applied to $f(x,c)=-(x-c)^2+c$ in the two possible orders:
+\[
+  D_c\big(M_x f\big) = D_c\, V = V'(c) = 1,
+  \qquad
+  M_x\big(D_c f\big) = \max_x\big[\,2(x-c)+1\,\big] = +\infty
+\]
+(the second expression is unbounded in $x$, since $2(x-c)+1\to+\infty$
+as $x\to\infty$).  So the two operators manifestly do \emph{not}
+commute: $D_cM_x f\ne M_xD_c f$ in general --- the right-hand
+expression need not even be finite.
+
+\paragraph{What the envelope theorem actually says.}
+The correct statement is not an order-of-operations identity
+between $D_c$ and $M_x$ applied independently, but a much more
+specific fact: $D_c$ applied \emph{after} $M_x$ equals $D_c f$
+\emph{evaluated at the particular point $x=x^*(c)$ singled out by}
+$M_x$ --- not maximised again, just evaluated there:
+\[
+  D_c\big(M_x f\big)(c)
+  \;=\;
+  \big(D_c f\big)\Big|_{x = x^*(c)},
+\]
+i.e.\ $V'(c) = \partial f/\partial c\,(x^*(c), c)$.  This is the
+boxed formula from the previous subsection, restated in operator
+language.  It holds not because $D_c$ and $M_x$ commute as abstract
+operators, but because of the special structure at $x^*(c)$: the
+chain-rule term that would obstruct commutativity,
+$\partial f/\partial x \cdot dx^*/dc$, vanishes identically there
+by the first-order condition.  ``Commutativity'' is the wrong frame;
+``evaluation at the optimiser, not re-optimisation'' is the right
+one.
+
+\paragraph{The graphical equality: tangency, not coincidence.}
+The cleanest way to see $V'(c) = \partial f/\partial c\,(x^*(c),c)$
+geometrically is to compare $V(c)$ against a \emph{naive} slice of
+$f$ at a fixed value of $x$ --- say $x=1$ --- treated as a function
+of $c$ alone:
+\[
+  h(c) := f(1, c) = -(1-c)^2 + c.
+\]
+$h$ and $V$ are \emph{different} functions: $V(c)=c$ is the true
+value function (re-optimising $x$ at every $c$), while $h(c)$ holds
+$x$ fixed at $1$ and only lets $c$ move.  They agree only where the
+fixed point $x=1$ happens to equal the true optimiser, i.e.\ at
+$c=1$ (since $x^*(1)=1$).  At every other $c$, $x=1$ is not optimal,
+so $h(c) < V(c)$ strictly.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{fig_env_tangency_2d.png}
+  \caption{The true value function $V(c)=c$ (black, straight line)
+  against the naive fixed-$x$ slice $h(c)=f(1,c)=-(1-c)^2+c$ (green,
+  dashed parabola).  The two curves touch only at $c=1$ (red dot),
+  where $x=1$ coincides with the true optimiser $x^*(1)=1$.
+  Crucially, they are not just equal in value there but
+  \emph{tangent}: $V'(1) = h'(1) = 1$, since $h'(c) = 2(c-1)+1$ gives
+  $h'(1)=1=V'(1)$.  Away from $c=1$, the slopes differ.  This is the
+  geometric content of the envelope theorem: $\partial f/\partial c$
+  at the optimiser reproduces not just the value but the
+  \emph{slope} of $V$, at that one point only.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{fig_env_tangency_3d.png}
+  \caption{The same comparison lifted onto the surface
+  $z=f(x,c)=-(x-c)^2+c$.  The black ridge is the true value function
+  $V(c)$, traced by the vertex $x^*(c)=c$ of each cross-sectional
+  parabola.  The green dashed curve is the fixed-$x=1$ slice
+  $h(c)=f(1,c)$, lying \emph{on} the surface but off the ridge except
+  at one point.  The red dot marks $(x,c)=(1,1)$, where the green
+  curve touches the black ridge --- here $x=1$ happens to be the
+  optimiser for $c=1$, so the two curves are tangent at this single
+  point, with matching slope $1$, even though they diverge
+  everywhere else.}
+\end{figure}
+
+\paragraph{Why tangency, not equality of functions, is the right
+picture.}
+This resolves a natural first guess: one might hope that $V(c)$ and
+some fixed-$x$ slice $h(c)=f(x_0,c)$ are globally related (e.g.\
+shifted versions of each other, as happens when two functions share
+\emph{all} their partial derivatives).  They are not --- $V$ and $h$
+are honestly different functions, equal and tangent at exactly one
+point ($c$ such that $x^*(c)=x_0$) and diverging elsewhere.  The
+envelope theorem is a statement about a single point of contact,
+not a global relationship between two surfaces or two curves: it
+identifies the slope of the ridge with the slope of \emph{the one
+cross-sectional slice that happens to pass through the ridge at
+that point}, and no further.
+
+\paragraph{A clean operator formula.}
+The discussion above shows $D_c$ and $M_x$ do not commute as
+operators.  But there \emph{is} a clean operator identity hiding in
+the envelope theorem, once we introduce two further operators
+alongside $D_c$ and $M_x$, with care about their domains and the
+types (signatures) of what goes in and what comes out.
+
+\begin{itemize}
+\item $D_c$: partial differentiation in the second slot.
+  \[
+    D_c : f(x,c) \;\longmapsto\; g(x,c) := \frac{\partial f}{\partial c}(x,c).
+  \]
+  Type: (function of two variables) $\to$ (function of two
+  variables).  Natural domain: $f$ differentiable in its second
+  argument.
+
+\item $M_x$: maximise out the first slot.
+  \[
+    M_x : f(x,c) \;\longmapsto\; h(c) := \max_x f(x,c).
+  \]
+  Type: (function of two variables) $\to$ (function of one
+  variable).  Natural domain: $f$ bounded above in $x$ for each $c$
+  (so the maximum exists).
+
+\item $A_x$: the maximiser (argmax) in the first slot.
+  \[
+    A_x : f(x,c) \;\longmapsto\; a(c) := \operatorname*{arg\,max}_x f(x,c).
+  \]
+  Type: (function of two variables) $\to$ (function of one
+  variable).  Natural domain: a strict subset of $M_x$'s domain ---
+  we need not only a finite maximum but a \emph{unique} maximiser,
+  so that $a(c)$ is single-valued.
+
+\item $S_x$: substitution into the first slot.
+  \[
+    S_x : \big(g(x,c),\, a(c)\big) \;\longmapsto\; k(c) := g\big(a(c),c\big).
+  \]
+  Type: (function of two variables, function of one variable) $\to$
+  (function of one variable).  Domain: all pairs of the stated
+  signatures (no further restriction); $S_x$ is just composition,
+  plugging $a(c)$ into the first slot of $g$ and leaving $c$ to
+  appear in both places.
+\end{itemize}
+
+With these four operators precisely typed, the envelope theorem
+becomes the identity
+\[
+  \boxed{\,D_c\big(M_x f\big) \;=\; S_x\big(D_c f,\; A_x f\big).\,}
+\]
+
+\emph{Why this is exactly right.}  Unwind both sides as functions
+of $c$:
+\[
+  \text{LHS:}\quad D_c(M_xf)(c) = \frac{d}{dc}\Big[\max_x f(x,c)\Big]
+  = V'(c).
+\]
+\[
+  \text{RHS:}\quad S_x(D_cf,\,A_xf)(c)
+  = (D_cf)\big(A_xf(c),\,c\big)
+  = \frac{\partial f}{\partial c}\big(x^*(c),\,c\big).
+\]
+These are literally the two sides of the boxed formula from
+\S\ref{subsec:envelope_simple}: $V'(c) = \partial f/\partial c\,
+(x^*(c),c)$.  So the formula is not a coincidental shuffling of
+symbols --- it is a faithful, type-correct restatement of the
+envelope theorem, with $A_x f$ (not $M_x f$) feeding into the first
+slot of $D_c f$.  Note carefully that $f$ appears \emph{twice} on
+the right: once differentiated ($D_cf$) and once maximised over via
+its argmax ($A_xf$) --- these are two different transformations of
+the same underlying $f$, combined only at the very last step by
+$S_x$.  This is the precise sense in which Question~1's intuition
+``it should be some kind of substitution into the derivative'' is
+correct, once $A_x$ (not the cruder $M_x$) is used to supply the
+point of substitution.
+
+\begin{remark}
+The earlier (incorrect) guess $M_x(D_cf)$ fails for two reasons
+simultaneously: (i) it maximises $D_cf$ over $x$ at each $c$
+\emph{independently} of where $f$ itself is maximised, so it
+re-optimises rather than substitutes; and (ii) as the example
+showed, this re-optimisation can diverge to $+\infty$ even when
+$M_xf$ itself is perfectly well-defined.  The corrected formula
+$S_x(D_cf, A_xf)$ avoids both problems: $A_xf$ locates the same
+point $x^*(c)$ used to build $V$, and $S_x$ merely evaluates
+$D_cf$ there --- no second optimisation is performed.
+\end{remark}
+
+%--------------------------------------------------------------------
+
+We showed $\lambda^* = f'(\theta_0)$, i.e.\ the multiplier is the
+derivative of the constrained optimum with respect to the
+constraint level.  How far does this identification extend?
+
+\paragraph{Setup: optimum as a function of the constraint level.}
+Consider the family of problems indexed by $c$:
+\[
+  \text{(P$_c$):} \qquad \max_\theta f(\theta)
+  \quad \text{subject to} \quad g(\theta) = c.
+\]
+For each $c$ in some neighbourhood, let $\theta^*(c)$ denote the
+solution and define the \emph{value function}
+\[
+  V(c) = f(\theta^*(c)) = \max_{\theta:\,g(\theta)=c} f(\theta).
+\]
+The shadow price is $V'(c)$ --- the rate at which the optimal value
+changes as the constraint level shifts.  In economics this is the
+general object of interest: differentiate the optimised outcome
+with respect to any parameter of the problem, not only with
+respect to one written as a multiplier.
+
+\paragraph{The Probabilist's derivation: $\theta^*(c)$ as a local inverse.}
+Before invoking the envelope theorem directly, it is worth seeing
+\emph{why} $\theta^*(c)$ is differentiable at all, following the Probabilist's
+argument explicitly.  At the unconstrained optimum (no $c$ yet),
+the first-order condition is
+\[
+  f'(\theta^*) - \lambda^* g'(\theta^*) = 0,
+\]
+which, together with the constraint $g(\theta^*)=c$, can be solved
+implicitly for $(\theta^*,\lambda^*)$ as functions of $c$.  The Probabilist's
+notes record this via the implicit function theorem applied
+directly to the stationarity system: writing $\theta^*=\theta^*(c)$
+and differentiating $g(\theta^*(c)) = c$ with respect to $c$,
+\[
+  g'(\theta^*)\cdot\frac{d\theta^*}{dc} = 1
+  \implies
+  \frac{d\theta^*}{dc} = \frac{1}{g'(\theta^*)}.
+\]
+Equivalently: locally near the current $c$, $\theta^* = g^{-1}(c)$
+--- the constrained optimiser is (locally) the inverse function of
+the constraint map itself, since $g$ is a bijection near a point
+where $g'\ne 0$.  This is exactly the relation
+$\lambda^* = f'(\theta^*)/g'(\theta^*)$ combined with
+$\theta^*=g^{-1}(c)$ that appears in the handwritten notes.
+
+Having established that $\theta^*(c)$ (and likewise $\lambda^*(c)$)
+are well-defined differentiable functions of $c$ near the current
+value, we can now form the composite
+\[
+  y(c) := f\big(\theta^*(c)\big),
+\]
+and ask for $y'(c)$.  By the chain rule,
+\[
+  y'(c) = f'\big(\theta^*(c)\big)\cdot \frac{d\theta^*}{dc}(c).
+\]
+This is precisely $V(c)$ from the paragraph above ($y\equiv V$),
+and substituting $d\theta^*/dc = 1/g'(\theta^*)$ recovers
+\[
+  V'(c) = \frac{f'(\theta^*(c))}{g'(\theta^*(c))} = \lambda^*(c),
+\]
+matching the boxed formula for $\lambda^*$ found earlier by direct
+substitution into the stationarity conditions.  So the Probabilist's route
+(differentiate the implicit system directly) and the envelope-theorem
+route (below) arrive at the same conclusion; the envelope theorem
+simply packages the cancellation that happens inside this
+chain-rule computation, without requiring us to solve for
+$d\theta^*/dc$ explicitly.
+
+\paragraph{Recovering $\lambda$ via the envelope theorem.}
+The elementary envelope theorem above had a single unconstrained
+variable $x$.  To apply it to the Lagrangian, we enlarge the
+variable solved for via the first-order condition from $\theta$
+alone to the pair $(\theta,\lambda)$, and treat the joint
+stationarity of $\mathcal{L}$ in this pair as the elementary
+theorem's stationary point $x^*$ --- \emph{not} as a maximisation:
+as the determinant computation in Part~5b-a, \S2.9 shows, $\mathcal{L}$
+has a genuine saddle in $(\theta,\lambda)$, and for fixed $\theta\ne
+c$ it is in fact \emph{unbounded} in $\lambda$ (linear, with no
+extremum at all).  So there is no optimisation over $\lambda$ in any
+ordinary sense --- the $\lambda$ first-order condition
+$\partial\mathcal{L}/\partial\lambda=0$ exists only to \emph{recover
+the constraint}, not to optimise anything.  This is legitimate because at a stationary point of a Lagrangian,
+\emph{both} partial derivatives vanish --- exactly the single
+first-order condition $\partial f/\partial x=0$ used in the proof
+above, just written out in two components instead of one.
+
+Form the Lagrangian for problem (P$_c$):
+\[
+  \mathcal{L}(\theta,\lambda;c) = f(\theta) - \lambda\,(g(\theta)-c).
+\]
+At the solution, $\theta^*(c)$ and $\lambda^*(c)$ are both functions
+of $c$ (assumed differentiable, at least locally near the current
+$c$).  Differentiating $V(c) = \mathcal{L}(\theta^*(c),\lambda^*(c);c)$
+with respect to $c$ and using the envelope theorem (the
+first-order conditions $\partial_\theta\mathcal{L}=0$ and
+$\partial_\lambda\mathcal{L}=0$ kill the terms coming from
+$d\theta^*/dc$ and $d\lambda^*/dc$, exactly as the single term
+$\partial f/\partial x\cdot dx^*/dc$ vanished in the elementary
+case):
+\[
+  V'(c) = \frac{\partial\mathcal{L}}{\partial c}
+  \bigg|_{\theta^*(c),\,\lambda^*(c)}
+  = \lambda^*(c).
+\]
+So $\lambda^*$ \emph{is} $V'(c)$: the Lagrange multiplier is the
+derivative of the optimum with respect to the right-hand side of
+the constraint.  This recovers our earlier finding
+$\lambda^*=f'(\theta_0)$ as the special case $g(\theta)=\theta$,
+
+$c=\theta_0$, where $V(c) = f(c)$ trivially and $V'(c)=f'(c)$.
+
+\paragraph{How general is this?}
+The derivation above did not use any special form of $g$ --- it
+holds for any smooth equality constraint $g(\theta)=c$, scalar or
+vector $\theta$, as long as the envelope theorem's regularity
+conditions hold (differentiability of $\theta^*(\cdot)$,
+$\lambda^*(\cdot)$ near $c$, and the constraint qualification).
+So within the class of problems written as ``maximise $f$ subject
+to $g(\theta)=c$,'' the shadow price of relaxing $c$ is always
+exactly $\lambda^*$ --- one of the Lagrange multipliers (the one
+attached to that constraint, if there are several).
+
+\paragraph{Beyond constraint levels: shadow prices in general.}
+In economics, ``shadow price'' is used more broadly: one
+differentiates the optimised value with respect to \emph{any}
+parameter of the problem, not only a constraint level appearing
+on the right-hand side.  For example, if $f$ itself depends on a
+parameter $a$ (say $f(\theta;a)$, as in a revenue function with a
+price parameter $a$), then $\partial V/\partial a$ is also called
+a shadow price, but it need not equal any Lagrange multiplier ---
+the envelope theorem gives $\partial V/\partial a
+= \partial f/\partial a$ evaluated at $\theta^*$, with no $\lambda$
+involved, because $a$ does not appear in the constraint at all.
+
+\paragraph{A further generalisation: parametrising $g$ itself.}
+The Probabilist's suggestion: under suitable regularity, one can go further
+and let the constraint be written as $g(\theta,c)=0$ directly ---
+i.e.\ $c$ enters the left-hand side, possibly nonlinearly, rather
+than appearing as a separate right-hand-side level subtracted off
+at the end.  Write the family of problems as
+\[
+  \text{(P$_c$):} \qquad \max_\theta f(\theta)
+  \quad\text{subject to}\quad g(\theta,c) = 0.
+\]
+This is strictly more general than (P$_c$) above: it reduces to it
+when $g(\theta,c) := g(\theta) - c$, but allows $c$ to enter
+nonlinearly, or even to enter both $\theta$ and $c$ jointly in ways
+that do not separate.
+
+Assume, for each $c$, a unique maximiser $\theta^*(c)$ exists and is
+differentiable in $c$ (if several local maxima exist, the same
+construction applies separately to each differentiable branch
+$\theta^*_i(c)$; we work with one branch and assume uniqueness for
+simplicity).  Define the value function
+$f^*(c) := f(\theta^*(c))$, which is differentiable as a composition
+of differentiable functions.  We re-derive the shadow-price formula
+by the Probabilist's direct route (differentiating the constraint), and then
+recover it again via the envelope theorem, to confirm the two routes
+agree.
+
+\begin{remark}[Branches and the manifold picture]
+The case of several local maxima, handled above by picking a
+differentiable branch $\theta^*_i(c)$, is the same phenomenon as
+Question~2's restricted function $\tilde f$ on the constraint
+manifold $\{g(\theta,c)=0\}$ for fixed $c$: each branch
+$\theta^*_i(c)$ traces a local maximum of $\tilde f$ on that
+manifold, and as $c$ varies these local maxima move continuously
+along it.  Making this correspondence precise --- describing the
+branches $\theta^*_i(c)$ intrinsically as critical points of
+$\tilde f$ varying with $c$, rather than extrinsically via the
+first-order condition in the ambient space --- requires the
+implicit function theorem applied jointly in $(\theta,c)$, which is
+a genuinely more delicate tool than anything used here. We do not
+pursue this; for our purposes the extrinsic description (the
+first-order condition $\nabla_\theta\mathcal{L}=0$ in the full
+$\theta$-space, for each fixed $c$) is sufficient and is what the
+derivation below uses throughout.
+\end{remark}
+
+\emph{Step 1: differentiate the constraint.}
+Since $g(\theta^*(c), c) \equiv 0$ for every $c$, differentiate
+both sides with respect to $c$ using the chain rule:
+\[
+  \frac{\partial g}{\partial\theta}\Big(\theta^*(c),c\Big)\cdot
+  \frac{d\theta^*}{dc}
+  +
+  \frac{\partial g}{\partial c}\Big(\theta^*(c),c\Big) = 0.
+\]
+Solve for $d\theta^*/dc$ (valid whenever $\partial g/\partial\theta
+\ne 0$, the constraint qualification):
+\[
+  \frac{d\theta^*}{dc} =
+  -\,\frac{\partial g/\partial c}{\partial g/\partial\theta}
+  \bigg|_{(\theta^*(c),\,c)}.
+\]
+
+\emph{Step 2: differentiate the value function.}
+By the chain rule, $f^{*\prime}(c) = f'(\theta^*(c))\cdot
+d\theta^*/dc$.  Substituting the result of Step~1:
+\[
+  f^{*\prime}(c) =
+  -\,f'(\theta^*(c))\cdot
+  \frac{\partial g/\partial c}{\partial g/\partial\theta}
+  \bigg|_{(\theta^*(c),c)}.
+\]
+
+\emph{Step 3: bring in $\lambda^*$.}
+From the Lagrangian first-order condition
+$f'(\theta^*) - \lambda^*\,\partial g/\partial\theta\,(\theta^*,c) = 0$,
+we have $f'(\theta^*) = \lambda^*\cdot \partial g/\partial\theta\,(\theta^*,c)$.
+Substituting into the Step~2 formula, the
+$\partial g/\partial\theta$ factors cancel:
+\[
+  \boxed{\,f^{*\prime}(c) = V'(c) =
+  -\,\lambda^*(c)\,\frac{\partial g}{\partial c}\Big(\theta^*(c),c\Big).\,}
+\]
+Before this cancellation we had a ratio of two partial derivatives
+of $g$; after substituting the Lagrangian condition we are left
+with just the numerator term, multiplied by $\lambda^*$.
+
+\emph{Recovering the simpler case.}
+To confirm this generalises the earlier finding, set
+$g(\theta,c) = \theta - c$ (our original convention).  Then
+$\partial g/\partial c = -1$, and the boxed formula gives
+$V'(c) = -\lambda^*\cdot(-1) = \lambda^*$ --- exactly the earlier
+result $\lambda^*=f'(\theta_0)$.  So the simple case is the special
+instance where $c$ enters $g$ additively with coefficient $-1$.
+
+\paragraph{Worked example: the multiplier is not parametrisation-invariant.}
+Take $f(\theta) = -(\theta-3)^2$ (unconstrained maximum at
+$\theta=3$) and compare two constraints with the \emph{same} zero
+set $\{\theta = c\}$ (for $\theta,c>0$), written two different ways:
+\[
+  g_1(\theta,c) = \theta - c, \qquad
+  g_2(\theta,c) = \theta^2 - c^2.
+\]
+Both vanish exactly when $\theta=c$, so both give the same
+$\theta^*(c) = c$ and the same value function
+$V(c) = f(c) = -(c-3)^2$, hence the same true shadow price
+$V'(c) = 6-2c$ (computed directly, with no reference to either
+Lagrangian).
+
+But the two multipliers differ:
+\[
+  \lambda_1^*(c) = \frac{f'(\theta^*)}{\partial g_1/\partial\theta}
+  = \frac{6-2c}{1} = 6-2c,
+  \qquad
+  \lambda_2^*(c) = \frac{f'(\theta^*)}{\partial g_2/\partial\theta}
+  = \frac{6-2c}{2c} = \frac{3-c}{c}.
+\]
+Checking the boxed formula for each: for $g_1$,
+$\partial g_1/\partial c = -1$, so
+$V'(c) = -\lambda_1^*\cdot(-1) = 6-2c$ --- correct.
+For $g_2$, $\partial g_2/\partial c = -2c$, so
+$V'(c) = -\lambda_2^*\cdot(-2c) = \frac{3-c}{c}\cdot 2c = 6-2c$
+--- also correct, by a different route.  Both recover the same true
+shadow price, but $\lambda_1^*\ne\lambda_2^*$ for $c\ne 0,3$: the
+Lagrange multiplier itself depends on how the constraint is
+\emph{written}, even though the constraint set and the shadow price
+do not.  Only $V'(c)$ is an invariant of the problem; $\lambda^*$ is
+an artefact of the chosen parametrisation of $g$.
+
+\paragraph{Connection to the Wikipedia formulation and to inequality
+constraints.}
+The Wikipedia article on the envelope theorem treats this in
+slightly more general terms still: it allows $f$ itself to depend
+on $c$ (write $f(\theta,c)$, not just $f(\theta)$), and states the
+result for inequality-constrained problems, which requires
+Karush--Kuhn--Tucker machinery beyond what we need here.  Stripped
+down to our equality-constraint, $f(\theta)$-independent-of-$c$
+case, and writing $V(c)$ in place of Wikipedia's value-function
+notation (matching our $f^*(c)$), their general statement
+specialises to exactly the boxed formula above.  The cleanest way
+to state it, avoiding the need to re-derive Steps~1--3 each time:
+extend the Lagrangian itself to carry the $c$-dependence,
+\[
+  \mathcal{L}(\theta,\lambda;c) = f(\theta) - \lambda\, g(\theta,c),
+\]
+and apply the elementary envelope theorem of
+\S\ref{subsec:envelope_simple} directly to this $\mathcal{L}$,
+treating $(\theta,\lambda)$ jointly as the stationary point ``$x^*$''
+of the elementary theorem (not as a maximiser):
+\[
+  V'(c) = \frac{\partial\mathcal{L}}{\partial c}
+  \bigg|_{\theta^*(c),\lambda^*(c)}
+  = -\lambda^*(c)\,\frac{\partial g}{\partial c}(\theta^*(c),c),
+\]
+identical to the boxed result, obtained with no need to separately
+differentiate the constraint.  This is the version that should be
+used in practice: state the parametrised Lagrangian once, then
+differentiate it in $c$ at the optimum --- the envelope theorem
+guarantees the $d\theta^*/dc$ and $d\lambda^*/dc$ terms vanish
+automatically, exactly as they did in the elementary case.
+
+%--------------------------------------------------------------------
+\subsection{Building the chain rule graphically: the Probabilist's step-by-step
+picture series}
+\label{subsec:envelope_chainrule_pictures}
+%--------------------------------------------------------------------
+
+The envelope-theorem discussion above used the chain rule in
+passing (\S\ref{subsec:envelope_simple}), but only for a single
+variable $x$.  In the Lagrangian setting, and in general, we need
+the chain rule for a function of \emph{two} variables $f(x,y)$
+composed with a parametric path $x=x(c)$, $y=y(c)$.  Before
+specialising to the envelope theorem (where one of the two
+variables will turn out to be the identity, $y(c)=c$), the Probabilist's
+notes build up the general picture in small steps, each one
+illustrated separately.  We reproduce the series here exactly,
+with commentary, and then continue it to the dot-product formula
+it is building toward.
+
+\paragraph{Setup.}
+We have a surface $z=f(x,y)$ (Figure~\ref{fig:vova-env-1}) and a
+path in the $(x,y)$-plane given parametrically by $c\mapsto
+(x(c),y(c))$ (Figure~\ref{fig:vova-env-2}).  Importantly, $y$ is
+{not} assumed to equal $c$ here --- both $x(c)$ and $y(c)$ are, for
+now, general functions of the parameter $c$.  This generality
+matters: in the envelope-theorem application later, $y(c)=c$ will
+be a special (degenerate) case, and seeing the general chain rule
+first prevents confusing the special structure of that case with
+the general mechanism.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{v1.png}
+  \caption{The surface $z=f(x,y)$.  A generic dome shape, no
+  parametrisation yet.}
+  \label{fig:vova-env-1}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\textwidth]{v2.png}
+  \caption{Left: the parameter axis $c$ (green), with the direction
+  of increasing $c$ marked.  Right: the image of the map
+  $c\mapsto(x(c),y(c))$ in the $(x,y)$-plane (red curve, arrows
+  showing the direction of increasing $c$ along the path).}
+  \label{fig:vova-env-2}
+\end{figure}
+
+\paragraph{The path as a curve in $(c,x,y)$-space, and its three
+shadows.}
+To keep track of both component functions $x(c)$ and $y(c)$
+simultaneously, the Probabilist lifts the picture into the three-dimensional
+space with axes $(c,x,y)$ --- note this is \emph{not} the
+$(x,y,z)$ space of the surface $f$; $z=f$ has not entered yet.  The
+red space curve is $c\mapsto(c,\,x(c),\,y(c))$, and it casts three
+shadows (orthogonal projections) onto the three coordinate planes.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v3.png}
+  \caption{The space curve $(c,x(c),y(c))$ in red, together with its
+  shadow (orange) on the $(x,y)$-plane --- this orange shadow is
+  exactly the red curve of Figure~\ref{fig:vova-env-2}, now seen as
+  a projection rather than drawn directly.}
+  \label{fig:vova-env-3}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v4.png}
+  \caption{A second shadow added: the magenta projection onto the
+  $(c,x)$-plane is the graph of $x=x(c)$ --- the first component
+  function on its own, as an ordinary function of $c$.}
+  \label{fig:vova-env-4}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v5.png}
+  \caption{The third shadow added: the green projection onto the
+  $(c,y)$-plane is the graph of $y=y(c)$.  All three shadows are now
+  visible together: $(x,y)$ (orange, the path itself), $(c,x)$
+  (magenta, the graph of $x(\cdot)$), $(c,y)$ (green, the graph of
+  $y(\cdot)$).  This completes the description of the parametric
+  path and its two component functions.}
+  \label{fig:vova-env-5}
+\end{figure}
+
+\paragraph{The same construction for the derivatives.}
+The Probabilist repeats the identical construction one level up: instead of
+the curve $(c,x(c),y(c))$, take the curve of \emph{derivatives}
+$(c,\,x'(c),\,y'(c))$, with primed axes $x',y'$.  The logic and the
+three shadows are exactly analogous --- only the object being
+plotted has changed, from positions to velocities.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v6.png}
+  \caption{The same three-shadow construction, now for the
+  derivative curve $(c,x'(c),y'(c))$: green is the $(c,y')$-shadow
+  (graph of $y'(\cdot)$), magenta is the $(c,x')$-shadow (graph of
+  $x'(\cdot)$).}
+  \label{fig:vova-env-6}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v7.png}
+  \caption{The fourth projection added, in light blue: the shadow
+  onto the $(x',y')$-plane itself.  This is the one we did not draw
+  in the first (position) series --- it is the new, essential
+  object: the image of the velocity vector $(x'(c),y'(c))$, traced
+  out as $c$ varies.}
+  \label{fig:vova-env-7}
+\end{figure}
+
+\paragraph{Isolating the velocity vector.}
+The $(x',y')$-shadow is now extracted on its own and reinterpreted:
+rather than viewing it as a curve traced by a moving point, each
+point $(x'(c_0),y'(c_0))$ on it is drawn as a vector emanating from
+the origin --- the instantaneous \emph{velocity} of the path
+$(x(c),y(c))$ at parameter value $c_0$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{v8.png}
+  \caption{The point $(x'(c),y'(c))$ on the $(x',y')$-plane, shown as
+  a radius vector from the origin.  This is the velocity vector of
+  the path at the corresponding parameter value --- the object that
+  will be dotted with the gradient of $f$ below.}
+  \label{fig:vova-env-8}
+\end{figure}
+
+\paragraph{Returning to the surface: lifting the path onto $f$.}
+The second half of the series returns to the surface $z=f(x,y)$
+and the floor path $(x(c),y(c))$, now shown together and then
+combined: the floor path is lifted vertically onto the surface,
+producing the composite curve
+$c\mapsto\big(x(c),\,y(c),\,f(x(c),y(c))\big)$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.45\textwidth]{v9.png}
+  \caption{The surface $z=f(x,y)$, redrawn and explicitly labelled.}
+  \label{fig:vova-env-9}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{v10.png}
+  \caption{The floor path $\{x=x(c),\,y=y(c)\}$, redrawn in
+  isolation, matching Figure~\ref{fig:vova-env-2}.}
+  \label{fig:vova-env-10}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{v11.png}
+  \caption{Surface and floor path shown together, the path still
+  lying flat on the $z=0$ plane beneath the surface --- not yet
+  lifted onto it.}
+  \label{fig:vova-env-11}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v12.png}
+  \caption{The floor path lifted vertically onto the surface,
+  producing the red space curve
+  $\{x=x(c),\,y=y(c),\,z=f(x,y)\}$ --- i.e.\ the graph of
+  $h(c):=f(x(c),y(c))$ traced out on the surface itself.  This is
+  the final object of the Probabilist's series: the composite function whose
+  derivative we want, displayed not as an abstract formula but as
+  an actual curve riding on the surface, directly above its shadow
+  on the floor.}
+  \label{fig:vova-env-12}
+\end{figure}
+
+\paragraph{Continuing the series: assembling the chain rule.}
+With every piece now in view --- the surface, the floor path, the
+lifted curve $h(c)$, and the velocity vector $(x'(c),y'(c))$ --- we
+can assemble them into the chain-rule formula.  We continue the Probabilist's
+series with three more pictures, completing the construction he
+sketched and naming as the goal: \emph{this is a dot product of two
+vectors.}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.68\textwidth]{v13_lifted_curve.png}
+  \caption{All the pieces together for a concrete example
+  $f(x,y)=4-x^2-0.6y^2$ with path $x(c)=c$, $y(c)=\tfrac12 c^2$
+  (chosen so that $y$ is \emph{not} the identity, matching the Probabilist's
+  emphasis that $y$ need not equal $c$): the orange floor curve
+  $(x(c),y(c))$, and the red lifted curve $h(c)=f(x(c),y(c))$ riding
+  on the surface directly above it.  Dotted vertical segments show
+  the lift at a few sample parameter values.  This is the direct
+  continuation of Figure~\ref{fig:vova-env-12} to a fully worked
+  numerical case.}
+  \label{fig:vova-env-13}
+\end{figure}
+
+\paragraph{The chain rule itself.}
+$h(c) = f(x(c), y(c))$ is a composition of $f:\mathbb{R}^2\to
+\mathbb{R}$ with the path $c\mapsto(x(c),y(c)):\mathbb{R}\to
+\mathbb{R}^2$.  The multivariate chain rule gives
+\[
+  h'(c) = \frac{\partial f}{\partial x}\big(x(c),y(c)\big)\cdot x'(c)
+  \;+\;
+  \frac{\partial f}{\partial y}\big(x(c),y(c)\big)\cdot y'(c).
+\]
+Writing the two partial derivatives as the gradient vector
+$\nabla f = (\partial f/\partial x,\ \partial f/\partial y)$,
+evaluated at $(x(c),y(c))$, and the two derivatives $x'(c),y'(c)$
+as the velocity vector from Figure~\ref{fig:vova-env-8}, the
+right-hand side is exactly a dot product:
+\[
+  \boxed{\,h'(c) = \nabla f\big(x(c),y(c)\big)\,\cdot\,
+  \big(x'(c),\,y'(c)\big).\,}
+\]
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{v14_velocity_components.png}
+  \caption{The velocity vector $(x'(c),y'(c))$ (blue) decomposed
+  into its two axis components $x'(c)$ (orange, along the
+  $x'$-axis) and $y'(c)$ (green, along the $y'$-axis) --- the two
+  terms that appear, each multiplying a partial derivative of $f$,
+  in the chain-rule sum above.}
+  \label{fig:vova-env-14}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v15_dotproduct.png}
+  \caption{The two vectors of the formula shown together: the
+  gradient $\nabla f(x(c),y(c))$ (crimson) and the velocity
+  $(x'(c),y'(c))$ (blue), with the unit vector $\hat v$ along the
+  velocity direction shown dashed.  The thick purple segment is
+  \emph{not} a third vector: it is the scalar projection
+  $\nabla f\cdot\hat v$, a length measured along the $\hat v$-axis
+  (negative here, since the segment points opposite to $\hat v$),
+  obtained by dropping a perpendicular (dotted grey) from the tip
+  of $\nabla f$ onto the line through $\hat v$.  The quantity we
+  actually want, $h'(c)=\nabla f\cdot(x',y')$, is a different
+  number still --- the dot product with the \emph{un-normalised}
+  velocity vector, $|(x',y')|$ times the scalar projection shown ---
+  and is reported separately, in the text box, precisely to avoid
+  drawing a number as though it were a vector.  In general,
+  $\nabla f\cdot v = |\nabla f|\,|v|\cos\alpha$, where $\alpha$ is
+  the angle between the two vectors; when they are perpendicular,
+  $h'(c)=0$, matching the fact that gradients are orthogonal to
+  level curves.}
+  \label{fig:vova-env-15}
+\end{figure}
+
+\paragraph{Specialising to the envelope theorem: $y(c)=c$.}
+The entire series above was deliberately general, with $x(c)$ and
+$y(c)$ both free functions of $c$.  The connection to
+\S\ref{subsec:envelope_simple}--\S\ref{subsec:envelope_operator} is
+the special case where the \emph{second} variable is the identity:
+$y(c) \equiv c$, so $y'(c)\equiv 1$ for every $c$.  Relabel
+$x(c) \to x^*(c)$ (the optimiser) and write $f(x,c)$ in place of
+$f(x,y)$.  The boxed chain-rule formula above becomes
+\[
+  \frac{d}{dc}\,f\big(x^*(c),\,c\big)
+  = \frac{\partial f}{\partial x}\big(x^*(c),c\big)\cdot
+    \underbrace{\frac{dx^*}{dc}}_{=\,x'(c)}
+  \;+\;
+  \frac{\partial f}{\partial c}\big(x^*(c),c\big)\cdot
+  \underbrace{1}_{=\,y'(c)},
+\]
+which is exactly the chain-rule expansion used to prove the
+elementary envelope theorem.  The first term vanishes by the
+first-order condition $\partial f/\partial x\,(x^*(c),c)=0$, leaving
+$V'(c) = \partial f/\partial c\,(x^*(c),c)$, the boxed result of
+\S\ref{subsec:envelope_simple}.  In the dot-product language of
+Figure~\ref{fig:vova-env-15}: the velocity vector in this special
+case is $(x'(c),\,1)$ --- always a vector with second component
+exactly $1$ --- and the vanishing of the first term is the
+geometric statement that the \emph{first component} of $\nabla f$
+(the $\partial f/\partial x$ direction) contributes nothing to the
+dot product at the optimiser, because that component of $\nabla f$
+is itself zero there.  The full generality of the picture series
+was needed to see clearly that this vanishing is special to the
+optimiser, and not a property of the dot-product formula itself,
+which in general has both terms contributing.
+
+%--------------------------------------------------------------------
+\subsection{The Probabilist's continuation: the dot product as a function of
+$c$, drawn on common abstract axes}
+\label{subsec:envelope_uv_abstract}
+%--------------------------------------------------------------------
+
+The picture series above (\S\ref{subsec:envelope_chainrule_pictures})
+reached the dot product $\nabla f\cdot(x',y')$ by drawing the two
+vectors in their own native planes and resorting to a projection
+construction to depict the resulting number.  The Probabilist's continuation,
+from the same morning, reaches the identical place by a more direct
+route: put both vectors in one common, abstract coordinate system
+from the start, and treat the dot product not as a single
+projection diagram but as an ordinary function of $c$.
+
+\paragraph{Step 1: common abstract axes $(a,b)$.}
+Rather than keeping the velocity vector in an $(x',y')$-plane and
+the gradient in a separately-labelled plane, relabel both as living
+in one shared abstract plane with axes $(a,b)$ --- emphasising that
+\emph{both} vectors are just ordered pairs of real numbers, and the
+labels $x',y'$ versus $\partial_xf,\partial_yf$ are bookkeeping, not
+a difference in the kind of object.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.62\textwidth]{v16_ab_axes.png}
+  \caption{Both parametric curves placed in one common $(a,b)$-plane.
+  Blue: $u(c)=(a,b)=(x'(c),\,y'(c))$, the velocity vector, traced as
+  $c$ varies.  Green: $v(c)=(a,b)=\big(\partial_xf(x(c),y(c)),\,
+  \partial_yf(x(c),y(c))\big)$, the gradient vector, also traced as
+  $c$ varies.  Putting both in the same $(a,b)$-plane (rather than
+  in two visually separate planes, as in
+  Figures~\ref{fig:vova-env-8} and \ref{fig:vova-env-15}) makes
+  plain that $u$ and $v$ are directly comparable objects of the same
+  type, both living in $\mathbb{R}^2$.}
+  \label{fig:vova-env-16}
+\end{figure}
+
+\paragraph{Step 2: fix one $c=c_0$ and isolate the two vectors.}
+Pin down a single parameter value $c_0$ and draw only the two
+resulting vectors $u(c_0)$ and $v(c_0)$, dropping the rest of each
+curve.  Crucially, the dot product $u(c_0)\cdot v(c_0)$ is then
+shown not as a geometric arrow but as a labelled point on a separate
+number line below --- directly resolving the earlier confusion
+(\S\ref{subsec:envelope_chainrule_pictures}, on the corrected
+Figure~\ref{fig:vova-env-15}) about whether the dot product should
+be drawn as a vector at all.  It should not: it is a single real
+number, and a number line is the correct picture for it.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{v17_uv_single_c.png}
+  \caption{For one fixed $c=c_0$: the vector $u$ (blue) and the
+  vector $v$ (green) in the $(a,b)$-plane.  Below, a separate number
+  line carries the single point $u\cdot v$ --- the dot product,
+  drawn exactly as what it is: a scalar, located on
+  $\mathbb{R}$, not an arrow in $\mathbb{R}^2$.}
+  \label{fig:vova-env-17}
+\end{figure}
+
+\paragraph{Step 3: let $c$ vary --- the dot product becomes a
+function $\mathbb{R}\to\mathbb{R}$.}
+The dot product itself, $(\cdot\,,\cdot):\mathbb{R}^2\times
+\mathbb{R}^2\to\mathbb{R}$, is a fixed bilinear functional --- it
+does not depend on $c$.  What depends on $c$ are its two arguments,
+$u(c)$ and $v(c)$.  Composing,
+\[
+  c \;\longmapsto\; u(c)\cdot v(c) \;=\; h'(c)
+\]
+is an ordinary function from $\mathbb{R}$ to $\mathbb{R}$, exactly
+like any other univariate function --- and so it can be drawn as an
+ordinary 2-d graph over the $c$-axis, with no vectors or planes
+needed anymore.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{v18_hprime_of_c.png}
+  \caption{The function $c\mapsto h'(c) = u(c)\cdot v(c)$, plotted
+  directly as a curve over the $c$-axis.  All of the vector geometry
+  of Figures~\ref{fig:vova-env-16}--\ref{fig:vova-env-17} has been
+  absorbed into evaluating the dot product at each $c$; the result
+  is just an ordinary real-valued function of one real variable,
+  no different in kind from $x(c)$ or $y(c)$ themselves.}
+  \label{fig:vova-env-18}
+\end{figure}
+
+\paragraph{Why this route is cleaner.}
+The projection construction of
+\S\ref{subsec:envelope_chainrule_pictures}
+(Figure~\ref{fig:vova-env-15}) is geometrically informative --- it
+shows \emph{why} the dot product has the value it does, via
+$|\nabla f|\,|v|\cos\alpha$ --- but it requires care to avoid
+mis-drawing the resulting scalar as a vector, exactly the error
+flagged earlier in this section.  The Probabilist's route sidesteps that risk
+entirely: by drawing $u\cdot v$ on a number line at a single $c$
+(Figure~\ref{fig:vova-env-17}), and then immediately treating $h'(c)$
+as an ordinary function of $c$ (Figure~\ref{fig:vova-env-18}), there
+is no step at which a scalar quantity is ever rendered with an
+arrowhead. The two approaches are complementary: the projection
+picture explains the \emph{value} of the dot product geometrically;
+this picture keeps the \emph{type} of the dot product (a number,
+varying with $c$) unambiguous throughout.
+
+
+%--------------------------------------------------------------------
+\subsection{Three problems and the triangle connecting them}
+\label{subsec:envelope_lm_summary}
+%--------------------------------------------------------------------
+
+We state three problems separately, in their own standard notation,
+and then connect them in pairs.
+
+\paragraph{Problem 1: constrained optimisation, parametrised by a
+right-hand side $c$.}
+Maximise $f(x)$ subject to $g(x)=c$, where $c$ is a parameter of the
+constraint's right-hand side. The Lagrangian is
+\[
+  \mathcal{L}(x,\lambda;c) = f(x) - \lambda\big(g(x)-c\big).
+\]
+For each $c$, a stationary point $\big(x^*(c),\lambda^*(c)\big)$
+solves $\nabla_{x,\lambda}\mathcal{L}=0$. Define the \emph{value
+function}
+\[
+  V(c) := \mathcal{L}\big(x^*(c),\lambda^*(c);\,c\big)
+        = f\big(x^*(c)\big),
+\]
+a function of $c$ alone. It can be differentiated in $c$; we will
+need $V'(c)$ below.
+
+\begin{remark}
+This is the single-variable Lagrangian, matching Part~5b-a
+throughout. It is deliberately \emph{not} the two-variable $f(x,y)$
+of the chain-rule picture series
+(\S\ref{subsec:envelope_chainrule_pictures}), where a genuine
+second variable $y$ appears alongside a path $x(c),y(c)$. Side~A
+below needs only one variable, so we state Problem~1 with one
+variable from the start.
+\end{remark}
+
+\paragraph{Problem 2: the envelope theorem.}
+In the simplest setting --- $\max_x f(x,c)$, unconstrained, no $g$
+--- write $x^*(c)=\arg\max_xf(x,c)$ and $V(c)=f(x^*(c),c)$. The
+envelope theorem states
+\[
+  V'(c) = \frac{\partial f}{\partial c}\Big(x^*(c),c\Big),
+\]
+proved by the chain rule: the term $\partial f/\partial
+x\cdot dx^*/dc$ vanishes because $\partial f/\partial x=0$ at
+$x^*(c)$. The same cancellation, applied jointly in
+$(x,y,\lambda)$, gives Problem~1's value function
+\[
+  V'(c) = \frac{\partial\mathcal{L}}{\partial c}
+  \bigg|_{x^*(c),y^*(c),\lambda^*(c)} = \lambda^*(c),
+\]
+since $\partial\mathcal{L}/\partial c=\lambda$. This is the
+\emph{shadow price} reading: $\lambda^*$ is the rate of change of
+the optimised value as the constraint level moves.
+
+\paragraph{Problem 3: the score test, informally.}
+Take a log-likelihood $\ell(\theta)$ and a simple null
+$H_0:\theta=\theta_0$. The score is $s(\theta)=\ell'(\theta)$. Under
+$H_0$, the identity $\E_{\theta_0}[s(\theta_0,X)]=0$ holds, and by
+the CLT the sample average score concentrates around zero and
+shrinks at rate $1/\sqrt{n}$ as the sample size grows. The test
+rejects $H_0$ when the observed score $s(\theta_0)$ is too far from
+zero relative to this shrinking spread --- formalised as
+$\xi_{LM}=s(\theta_0)^2/\mathcal{I}(\theta_0)\xrightarrow{d}\chi^2_1$.
+
+\paragraph{Side A: Problem 1 $\leftrightarrow$ Problem 2.}
+Apply Problem~1 with $x\to\theta$, $f(x)\to\ell(\theta)$, and the
+constraint $g(\theta)=\theta=c$ (so $g$ is the identity). The
+genuine difficulty: the feasible set $\{\theta=c\}$ is one point, so
+$\theta^*(c)=c$ trivially, with no first-order condition in $\theta$
+alone --- the naive match $x\to\theta$ fails on its own, since there
+is nothing to differentiate. The fix is to apply Problem~2's theorem
+not to $\theta$ alone but to the pair $(\theta,\lambda)$ jointly,
+via $\mathcal{L}(\theta,\lambda;c)=\ell(\theta)-\lambda(\theta-c)$:
+both first-order conditions now hold genuinely
+($\ell'(\theta)-\lambda=0$ recovers $\lambda$; $-(\theta-c)=0$
+recovers $\theta=c$), even though $(\theta^*,\lambda^*)$ is a
+saddle, not a maximum --- legitimate because the chain-rule proof of
+Problem~2 only used the first-order condition, never concavity.
+Carrying this out: $V(c)=\ell(\theta^*(c))-\lambda^*(c)\cdot 0=\ell(c)$
+directly, so $V'(c)=\ell'(c)$; and via the envelope theorem
+$V'(c)=\lambda^*(c)$. Equating:
+\[
+  \boxed{\ \lambda^*(c) = \ell'(c).\ }
+\]
+
+\paragraph{The Probabilist's strengthening: the Lagrangian equals $V$
+identically, not just up to a constant.}
+The Probabilist's notes of June~21, 2026 revisit Problem~2 once more, this time
+following Wikipedia's statement of the constrained envelope theorem.
+The upgrade relative to the further generalisation of
+\S\ref{subsec:envelope_operator} (which let the constraint be
+$g(\theta,c)=0$ but kept $f(\theta)$ free of $c$) is to let $f$
+itself depend on $c$ as well, matching Problem~2's
+$f(x,c)$:
+\[
+  \max_x f(x,c) \quad\text{subject to}\quad g(x,c)=0,
+  \qquad
+  \mathcal{L}(x,\lambda;c) = f(x,c) - \lambda\,g(x,c).
+\]
+For each fixed $c$, the Probabilist takes $\big(x^*(c),\lambda^*(c)\big)$ to be
+the stationary point of $\mathcal{L}(x,\lambda)$ --- a function of
+the \emph{two} variables $x,\lambda$ at that fixed $c$, exactly the
+saddle-point picture recalled at the start of this notebook entry
+--- and sets $V(c):=f(x^*(c),c)=\max_{g=0}f(x,c)$, as before. The
+envelope theorem as already stated gives the derivative identity
+\[
+  V'(c) = \frac{\partial \mathcal{L}}{\partial c}
+  \Big(x^*(c),\lambda^*(c),c\Big). \tag{1}
+\]
+The Probabilist's observation is that, because the constraint is an
+\emph{equality} ($g=0$, not $g\le 0$), a strictly stronger statement
+holds: not merely that the two sides of~(1) share a derivative, but
+that the underlying functions of $c$ coincide \emph{exactly}, with
+no leftover constant of integration:
+\[
+  \mathcal{L}\big(x^*(c),\lambda^*(c),c\big) = V(c)
+  \qquad\text{for every } c. \tag{2}
+\]
+The proof is immediate from the definition of $\mathcal{L}$ together
+with feasibility of the optimiser:
+\[
+  \mathcal{L}\big(x^*(c),\lambda^*(c),c\big)
+  = f\big(x^*(c),c\big) - \lambda^*(c)\,g\big(x^*(c),c\big)
+  = V(c) - \lambda^*(c)\cdot 0 = V(c),
+\]
+the last step using $g(x^*(c),c)=0$: the optimiser is feasible at
+\emph{every} $c$, so the constraint term vanishes identically, not
+just at one value of $c$.
+
+Differentiating~(2) directly recovers~(1), so (2)~$\Rightarrow$~(1);
+the converse need not hold, since~(1) alone only says the two sides
+agree up to an additive constant in $c$, while~(2) pins that
+constant at exactly zero. As the Probabilist puts it: the two functions are
+not merely shifted copies of one another --- they are equal, the
+shift being zero.
+
+This is not new content so much as an unarticulated special case of
+what Side~A already computed: the step
+``$V(c)=\ell(\theta^*(c))-\lambda^*(c)\cdot 0=\ell(c)$'' above
+\emph{is} identity~(2), for the particular instance where
+$f(\theta)$ does not depend on $c$ and $g(\theta,c)=\theta-c$. The Probabilist's
+note packages this as a general fact about equality-constrained
+Lagrangians, rather than a coincidence of that one computation.
+
+\emph{Caveat (the Probabilist).} Identity~(2) rests on $g(x^*(c),c)=0$ holding
+exactly --- genuine equality. If the constraint is instead an
+inequality, $g(x,c)\le 0$, only the derivative identity~(1) is
+asserted in general; (2) may fail, even though complementary
+slackness still gives $\lambda^*(c)\,g(x^*(c),c)=0$ pointwise at
+each $c$. The Probabilist flags this contrast without resolving it further
+here.
+
+\paragraph{Side B: Problem 1 $\leftrightarrow$ Problem 3.}
+Renaming $c\to\theta_0$, Side~A's boxed identity reads
+$\lambda^*=\ell'(\theta_0)=s(\theta_0)$: the Lagrange multiplier at
+the constrained optimum \emph{is} the score at the null. This is
+exactly the quantity Problem~3 squares and divides by Fisher
+information to build $\xi_{LM}$. So Problem~1's $\lambda^*$ is not
+merely analogous to Problem~3's score --- it is the same number,
+under two names, which is why the test is called both the
+``score test'' and the ``LM test.''
+
+\paragraph{Side C: Problem 2 $\leftrightarrow$ Problem 3.}
+The shadow-price reading of Side~A ($\lambda^*=V'(\theta_0)$, the
+sensitivity of the optimised log-likelihood to where we place the
+null) gives the score a second interpretation, beyond ``slope of
+$\ell$ at $\theta_0$'': it is \emph{how much the constrained optimum
+would improve if the null were nudged}. A score near zero means the
+optimised value is insensitive to nudging $\theta_0$ --- the null is
+already where the unconstrained optimum would be, consistent with
+$H_0$. A large score means nudging $\theta_0$ would improve the fit
+substantially --- the data pull away from the null, exactly what
+Problem~3's test is built to detect. The CLT shrinkage in Problem~3
+($s(\theta_0)\to 0$ at rate $1/\sqrt n$ under $H_0$) is then read,
+via Side~A, as: the shadow price of the constraint vanishes
+asymptotically when the constraint is true.
+
+\paragraph{What does not change.}
+Problem~3's test statistic needs none of Problems~1--2 to be
+computed --- as emphasised in Part~5b-a, \S2.7. The triangle above
+is explanatory: it shows the same number, $\lambda^*=s(\theta_0)$,
+arising from three different questions, and gives the score test's
+central quantity a economic name (shadow price) that the bare
+formula does not supply on its own.
+
+%--------------------------------------------------------------------
+\subsection{A historical note: which came first, score or
+multiplier?}
+\label{subsec:envelope_lm_history}
+%--------------------------------------------------------------------
+
+The triangle above raises a natural question: is the Lagrangian
+apparatus actually needed to define or compute the score test, or
+is it decoration? The answer, confirmed by the history, is that it
+is decoration --- but the chronology is the reverse of what one
+might guess.
+
+\paragraph{Rao (1948) came first, with no Lagrangian at all.}
+C.~R. Rao's 1948 paper introduces the score test directly: the
+statistic is built from the score $s(\theta_0)$ and the Fisher
+information $\mathcal{I}(\theta_0)$, with $\xi=s(\theta_0)^2/
+\mathcal{I}(\theta_0)\xrightarrow{d}\chi^2_1$ under $H_0$. No
+constrained optimisation, no Lagrangian, no multiplier appears in
+this original formulation --- it is Problem~3 above, stated and
+proved on its own terms.
+
+\paragraph{Silvey (1959) came eleven years later, adding the
+Lagrangian framing.}
+Aitchison and Silvey (1958) and Silvey (1959) approached the same
+problem from the constrained-MLE side: maximise the log-likelihood
+subject to the null's restrictions, form the Lagrangian, and observe
+that the resulting multiplier $\lambda^*$ is (asymptotically)
+distributed the same way as Rao's score statistic. Silvey's 1959
+paper is the source of the name ``Lagrange Multiplier test.'' So
+the order is: \emph{score test first, Lagrangian re-derivation
+second} --- not the reverse.
+
+\paragraph{Correcting one detail, confirming the main point.}
+This means the natural guess --- that the test was first defined
+via $\lambda^*$ and only later ``unburdened'' into the score form
+--- has the chronology backwards: Rao's original score form never
+carried Lagrangian baggage to begin with; Silvey's Lagrangian
+version was an \emph{additional}, later route to the same number,
+not a simplification of an earlier, more complicated one. But the
+substantive conclusion is exactly right: computing and justifying
+the test requires only $s(\theta_0)$ and $\mathcal{I}(\theta_0)$,
+both of which are obtained by differentiation alone, with no
+optimisation or stationarity condition involved (Problem~3, on its
+own, needs none of Problem~1's machinery). The Lagrangian route
+(Side~A above) shows that $\lambda^*$ --- obtained by solving a
+constrained-optimisation stationarity system --- happens to equal
+$s(\theta_0)$, but as established earlier in this document, that
+stationarity system is solving a problem whose feasible set is a
+single point: there is no genuine optimisation content in it, and
+the ``answer'' it returns is no different from what direct
+differentiation already supplies.
+
+\paragraph{Why both names survived, rather than one replacing the
+other.}
+There is no documented single event where the field renamed the
+test from ``LM'' to ``score''; both names remain in active use
+today, split roughly along disciplinary lines --- the score-test
+name is more common in statistics (following Rao), the LM-test name
+more common in econometrics (following Silvey, and popularised
+further by Breusch and Pagan's 1980 use of it for the
+heteroscedasticity test that motivated this entire document). The
+coexistence reflects two independent discoveries of the same
+asymptotic statistic, each retaining the name attached to its own
+derivation route, rather than a deliberate later simplification of
+one name into the other.
+
+\end{document}

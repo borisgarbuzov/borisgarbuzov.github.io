@@ -1,0 +1,1207 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\mbF}{\mathcal{F}}
+\newcommand*{\ve}{\varepsilon}
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~10~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries Homoscedasticity: Foundations\\and OLS Inference}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\setcounter{section}{0}   % so first \section gives §11
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+\section{Conditional Variance and Homoscedasticity}
+\label{sec:condvar}
+%--------------------------------------------------------------------
+
+\subsection{Definition of conditional variance}
+
+\textbf{The operator view.}
+Just as $\E[Y \mid X]$ is a binary operator mapping $(X,Y)$ to a random
+variable, the conditional variance is a binary operator:
+\[
+  \Var(\,\cdot \mid \cdot\,): (X, Y) \;\longmapsto\; \Var(Y \mid X),
+\]
+where the output is a non-negative random variable on $(\Omega,\mbF,\mP)$.
+Unlike its predecessor, it is defined constructively: we already know
+$\E[Y \mid X]$ exists, and we use it to build the new operator.
+
+\textbf{Construction.}
+Assume $\E[Y^2] < \infty$. Then $(Y - \E[Y \mid X])^2$ is integrable,
+and we define:
+\[
+  \Var(Y \mid X) \;=\; \E\bigl[(Y - \E[Y \mid X])^2 \;\big|\; X\bigr].
+\]
+Setting $u = Y - \E[Y \mid X]$, this is simply a notational shorthand:
+\[
+  \Var(Y \mid X) = \E[u^2 \mid X].
+\]
+The output is a $\sigma(X)$-measurable random variable with values in
+$[0,\infty)$.
+
+\textbf{The representing function and its natural domain.}
+By Doob--Dynkin, there exists a Borel function $g:\mR\to[0,\infty)$
+such that $\Var(Y\mid X) = g(X)$ a.s. The function $g$ represents the
+conditional variance as a function of the realised value of $X$.
+
+The identity $g(X) = \Var(Y \mid X)$ is a statement about random
+variables: it holds $\mP$-almost surely. This means $g$ is only
+constrained at points $x$ that $X$ hits with positive $P_X$-probability.
+More precisely: modifying $g$ on any Borel set $B$ with $P_X(B) = 0$
+leaves $g(X)$ unchanged $\mP$-a.s., and hence leaves $\Var(Y\mid X)$
+unchanged. So $g$ is only determined $P_X$-almost everywhere.
+
+If we wish to extend $g$ to a fully specified function on all of $\mR$,
+the extension on $P_X$-null sets is arbitrary, subject only to:
+\begin{itemize}
+  \item \emph{Borel measurability}: so that $g(X)$ is a well-defined
+        random variable;
+  \item \emph{Non-negativity}: $g(x) \geq 0$ for all $x$, to preserve
+        the interpretation as a variance.
+\end{itemize}
+
+\begin{remark}
+The range $X(\Omega) \subseteq \mR$ and the support $\mathrm{supp}(P_X)$
+are different objects and should not be conflated. For instance, $X$
+could take every real value (full range) while $P_X$ is concentrated at
+a single point (if $X = c$ $\mP$-almost surely, even though isolated
+excursions occur on a $\mP$-null set). Conversely, $X(\Omega)$ could be
+a proper subset of $\mathrm{supp}(P_X)$ is not possible in general.
+The correct concept for our purposes is neither: it is the
+$P_X$-null sets of $\mR$. Any Borel $B$ with $P_X(B) = 0$ is
+irrelevant for $g$, regardless of whether $B$ intersects $X(\Omega)$
+or $\mathrm{supp}(P_X)$.
+\end{remark}
+
+\begin{remark}[Non-uniqueness of $g$]
+The random variable $\Var(Y \mid X)$ is unique up to a $\mP$-null set
+on $\Omega$. The representing function $g$ is unique $P_X$-almost
+everywhere on $\mR$: any two versions agree on every Borel set of
+positive $P_X$-measure, and may differ on $P_X$-null sets.
+
+In particular, the pointwise statement ``$\Var(Y \mid X = x) = \sigma^2$
+for all $x \in \mR$'' is not well-posed: it makes claims about $g$ at
+points where $P_X$ assigns zero mass, and $g$ is not determined there.
+The correct formulation
+is $g = \sigma^2$ $P_X$-a.e., equivalently $\Var(Y \mid X) = \sigma^2$
+$\mP$-a.s.
+\end{remark}
+
+\subsection{Homoscedasticity}
+
+\textbf{General definition (the Probabilist).}
+Before restricting to regression, consider an arbitrary sequence of
+random variables $(u_1,\ldots,u_n)$ with second moments, defined on a
+common probability space. No pairing with regressors, no model.
+
+\begin{definition}
+The sequence $(u_1,\ldots,u_n)$ is \textbf{homoscedastic} if
+\[
+  \Var(u_1) = \Var(u_2) = \cdots = \Var(u_n).
+\]
+If the sequence has second moments but is not homoscedastic, it is
+\textbf{heteroscedastic}.
+\end{definition}
+
+The word comes from Greek: \textit{homos} (same) + \textit{skedastikos}
+(able to scatter), from \textit{skedannynai} (to scatter). The
+``scedastic'' root refers to dispersion or spread; homoscedastic means
+``scattering equally.''
+
+\textbf{Regression context: conditional version.}
+In the regression model $Y_i = \beta_0 + \beta_1 X_i + u_i$, the
+natural generalisation replaces unconditional variances by conditional
+ones. But there is a subtlety: $\Var(u_i \mid X_i) = g_i(X_i)$ is
+a \emph{random variable} (it depends on $X_i$), whereas
+$\Var(u_i)$ in the general definition is a non-random scalar.
+
+Homoscedasticity in the regression context therefore adds two
+requirements compared to the general definition:
+\begin{enumerate}[label=(\arabic*)]
+  \item Replace unconditional variances by conditional variances:
+        $\Var(u_i) \to \Var(u_i \mid X_i)$.
+  \item Require that these conditional variances are \textbf{non-random}
+        (degenerate): $\Var(u_i \mid X_i) = \sigma^2$ a.s., i.e.\ the
+        random variable $g_i(X_i)$ collapses to a constant.
+\end{enumerate}
+Condition (2) has no analogue in the unconditional definition, where
+$\Var(u_i)$ is already a scalar by definition.
+
+\textbf{Definition on a sample of pairs.}
+Let $(X_1,Y_1),\ldots,(X_n,Y_n)$ be a random vector of pairs defined on
+a common probability space $(\Omega,\mbF,\mP)$. No further assumptions
+(independence, identical distribution) are imposed yet. For each $i$,
+define the conditional variance function
+\[
+  g_i(x) = \Var(Y_i \mid X_i = x),
+\]
+so that $\Var(Y_i \mid X_i) = g_i(X_i)$ a.s.
+
+\begin{definition}
+The sample $(X_1,Y_1),\ldots,(X_n,Y_n)$ is \textbf{homoscedastic} if
+there exists a constant $\sigma^2 > 0$ such that
+\[
+  \Var(Y_i \mid X_i) = \sigma^2 \quad \text{a.s., for each } i = 1,\ldots,n.
+\]
+Equivalently, $g_i = \sigma^2$ $P_{X_i}$-a.e.\ for each $i$.
+\end{definition}
+
+This definition makes no assumption about the relationship between pairs.
+In particular:
+\begin{itemize}
+  \item Different pairs may have different joint distributions (the $g_i$
+        may be different functions, as long as each equals $\sigma^2$
+        $P_{X_i}$-a.e.).
+  \item The pairs need not be independent.
+  \item The $X_i$ need not have the same marginal distribution.
+\end{itemize}
+
+\textbf{Equivalence under identical distribution.}
+Now suppose the pairs are identically distributed: $(X_i,Y_i)
+\overset{d}{=} (X,Y)$ for a single ``population'' pair $(X,Y)$.
+No independence between pairs is assumed. Then all pairs share
+the same joint distribution, so $g_i = g$ for all $i$, where
+$g(x) = \Var(Y \mid X = x)$ is the conditional variance function of the
+population pair.
+
+\begin{proposition}
+If the pairs $(X_i,Y_i)$ are identically distributed as $(X,Y)$,
+then the sample is homoscedastic if and only if the population pair
+$(X,Y)$ is homoscedastic, i.e.\ $g = \sigma^2$ $P_X$-a.e.
+\end{proposition}
+
+\begin{proof}
+Since all $g_i = g$ and all $P_{X_i} = P_X$, the condition
+$g_i = \sigma^2$ $P_{X_i}$-a.e.\ for each $i$ reduces to $g = \sigma^2$
+$P_X$-a.e.
+\end{proof}
+
+\begin{remark}
+Independence between pairs plays no role here. It is used later, in
+Section~\ref{sec:consequences}, where we compute the variance of
+$\hat\beta_1$: there the cross-terms $\mathrm{Cov}(u_i, u_j)$ must vanish, and
+this requires independence (or at least uncorrelatedness) of the errors
+across pairs. For the equivalence of homoscedasticity definitions, only
+identical distribution is needed.
+\end{remark}
+
+Under identical distribution, the sample-level definition collapses to a
+single condition on the population, and it is natural to state
+homoscedasticity at the population level:
+
+\begin{definition}
+The pair $(X,Y)$ is \textbf{homoscedastic} if
+\[
+  \Var(Y \mid X) = \sigma^2 \quad \text{a.s.}
+\]
+for some constant $\sigma^2 > 0$.
+\end{definition}
+
+\begin{remark}
+In the non-random-$X$ setting of the non-random-$X$ section (Part~1),
+homoscedasticity was $\Var(\ve_i) = \sigma^2$ for all $i$. There the
+$x_i$ are fixed, so each $g_i$ is evaluated at a single point: $g_i(x_i)
+= \sigma^2$. This is a finite-sample version of the general definition,
+without any population structure.
+\end{remark}
+
+\textbf{Why it matters.}
+The homoscedasticity condition determines whether the OLS estimator
+has a tractable variance and whether standard inference is valid;
+see Section~\ref{sec:consequences}.
+
+%--------------------------------------------------------------------
+
+\subsection{Are observations i.i.d.\ under heteroscedasticity? Incidental parameters revisited}
+\label{subsec:iid-heteroscedastic}
+
+We follow Boris's notes of July~3, 2026 (note~57).
+
+\subsubsection*{The question}
+
+Boris conjectured that observations $(x_i, y_i)$ are i.i.d.\ under
+$H_0$ (homoscedasticity) but not under $H_a$ (heteroscedasticity),
+since under $H_a$ different observations seem to come from
+distributions with different variances.  The Probabilist disagrees: the
+observations are i.i.d.\ in either case.  Let us sort this out.
+
+\subsubsection*{What ``observation'' means}
+
+An observation is the pair $(x_i, y_i)$.  We adopt the i.i.d.\
+sampling assumption:
+\[
+  (x_i, y_i) \;\text{are i.i.d.\ from the joint law of }(X, Y).
+  \tag{0}
+\]
+The population model is
+\[
+  Y = \beta_0 + \beta_1 X + U. \tag{1}
+\]
+The conditional variance function is
+\[
+  \sigma^2(x) := \Var(U \mid X = x),
+\]
+and for the $i$-th observation we write $\sigma_i^2 := \sigma^2(x_i) =
+\Var(u_i \mid x_i)$.
+
+\subsubsection*{The Probabilist is right: heteroscedastic observations are still i.i.d.}
+
+Under assumption~(0), every pair $(x_i, y_i)$ is drawn from the same
+joint distribution of $(X, Y)$.  Heteroscedasticity means
+$\sigma^2(x)$ is non-constant in $x$ — but this is a property of the
+\emph{conditional} distribution of $Y$ given $X$, not a statement that
+different observations come from different marginal laws.  The joint
+law of $(X_i, Y_i)$ is the same for every $i$.
+
+A concrete way to see it: $\sigma_i^2 = \sigma^2(X_i)$ is a function
+of $X_i$, which is itself i.i.d.\ across $i$.  Therefore $\sigma_i^2$
+is i.i.d.\ (as a random variable), even though it takes different
+values at different realisations of $X_i$.
+
+\begin{remark}[Boris's confusion, unpacked]
+Boris thought that heteroscedasticity means ``observation~$i$ comes
+from a distribution with variance $\sigma_i^2$,'' interpreting $i$ as
+an index that labels fundamentally different populations.  This would
+indeed break i.i.d.  But $\sigma_i^2$ is not indexed by $i$ in that
+sense — it is indexed by the realised value $x_i$.  The subscript $i$
+is a shorthand for $\sigma^2(x_i)$, not a label for a separate law.
+All observations are draws from the same joint $(X, Y)$ distribution;
+they simply land at different values of $X$, giving different
+conditional variances.
+\end{remark}
+
+\subsubsection*{What the Probabilist calls ``over-relaxed''}
+
+Boris initially considered the more general setup where each
+$\sigma_i^2$ could have a \emph{different distribution} depending on
+$i$.  This would go beyond heteroscedasticity to a model where
+different observations literally come from different populations.
+The Probabilist correctly says this is over-relaxed for the present framework:
+assumption~(0) already constrains all pairs to share the same law,
+so the $\sigma_i^2$ must be identically distributed (though not
+constant).
+
+\subsubsection*{Homoscedasticity as degeneracy of $\sigma_i^2$}
+
+In the i.i.d.\ framework, the Probabilist's characterisation is sharp:
+\begin{itemize}
+\item \textbf{Heteroscedasticity:} $\sigma_i^2 = \sigma^2(X_i)$ is a
+  non-degenerate random variable — it varies with $X_i$.
+\item \textbf{Homoscedasticity:} $\sigma^2(x) = \sigma^2$ is constant
+  in $x$, so $\sigma_i^2 = \sigma^2$ a.s.\ — the random variable
+  $\sigma^2(X_i)$ is \emph{degenerate} (a point mass at $\sigma^2$).
+\end{itemize}
+Equality across observations then follows automatically from
+degeneracy: if $\sigma_i^2 = c$ a.s.\ for all $i$, then certainly
+$\sigma_1^2 = \sigma_2^2 = \cdots = c$.  So in the i.i.d.\ setting,
+homoscedasticity \emph{is} the degeneracy of $\sigma^2(X)$ as a
+random variable.
+
+\subsubsection*{What about incidental parameters?}
+
+Boris asks: should he forget about incidental parameters in this
+context?  The answer depends on which framework we are in.
+
+\medskip
+\noindent\textbf{Random-regressor framework (assumption~(0)):} No
+incidental parameters arise.  The function $x \mapsto \sigma^2(x)$
+is a single unknown object — infinite-dimensional if left
+unrestricted, but not one-parameter-per-observation.  The BP
+parametrisation $\sigma^2(x) = h(\alpha^\top z)$ imposes a
+finite-dimensional structure on this function.  In this framework,
+Boris is right to set incidental parameters aside.
+
+\medskip
+\noindent\textbf{Fixed-regressor framework (Koenker's A.1):} Here
+$x_1, \ldots, x_n$ are treated as known constants, not as
+realisations of a random variable.  The conditional variance
+$\sigma_i^2 = \sigma^2(x_i)$ is then a deterministic unknown number —
+one per observation.  With $n$ free $\sigma_i^2$'s and $n$
+observations, the number of parameters grows with the sample size.
+This is the incidental parameters problem: no consistent estimator of
+each $\sigma_i^2$ exists because no observation replicates the same
+$x_i$.  The BP parametrisation resolves this by reducing $n$ free
+constants to $q+1$ free constants in $\alpha$.
+
+\begin{remark}[Clarification of an earlier remark]
+In note~51, when I described the incidental parameters problem, I was
+speaking in the fixed-regressor sense — each new observation arrives
+with a fresh $\sigma_i^2$ that never gets estimated with more data.
+This is technically correct in that framework.  However, as the Probabilist and
+Boris established in note~57, the natural framework for the BP test
+is the i.i.d.\ random-regressor one (assumption~(0)), where the
+problem does not arise.  The incidental parameters language is
+therefore more relevant to understanding \emph{why a parametric form
+for $\sigma^2(x)$ is needed}, not to characterising the statistical
+model per se.
+\end{remark}
+
+%--------------------------------------------------------------------
+\section{Consequences for OLS Inference}
+\label{sec:consequences}
+%--------------------------------------------------------------------
+
+We now work in the random-$X$ framework of the random-$X$ framework (Part~1).
+The data are an i.i.d.\ sample $(X_1,Y_1),\ldots,(X_n,Y_n)$ of pairs,
+each with the same joint distribution as $(X,Y)$. The model is
+\[
+  Y_i = \beta_0 + \beta_1 X_i + u_i,
+\]
+where $u_i = Y_i - \E[Y_i \mid X_i]$, so $\E[u_i \mid X_i] = 0$ by
+construction. All quantities are random: $X_i$, $Y_i$, $u_i$,
+and therefore $\hat\beta_0$, $\hat\beta_1$ as well.
+
+The OLS estimator is
+\[
+  \hat\beta_1
+  = \frac{\sum_{i=1}^n (X_i - \bar X)(Y_i - \bar Y)}
+         {\sum_{i=1}^n (X_i - \bar X)^2}
+  = \frac{S_{XY}}{S_{XX}},
+\]
+where $S_{XX} = \sum(X_i-\bar X)^2$ and $S_{XY} = \sum(X_i-\bar X)(Y_i-\bar Y)$
+are now random. We condition throughout on $\mathbf{X} = (X_1,\ldots,X_n)$;
+this is the standard device that recovers the fixed-$X$ analysis as a
+conditional statement.
+
+\subsection{Conditional unbiasedness}
+
+\begin{align*}
+\E[\hat\beta_1 \mid \mathbf{X}]
+  &= \frac{1}{S_{XX}}\sum_{i=1}^n (X_i-\bar X)\,\E[Y_i \mid \mathbf{X}].
+\end{align*}
+By the i.i.d.\ assumption, $(X_j, Y_j)$ is independent of $X_i$ for
+$j \neq i$, so $\E[Y_i \mid \mathbf{X}] = \E[Y_i \mid X_i]
+= \beta_0 + \beta_1 X_i$.
+Substituting:
+\[
+  \E[\hat\beta_1 \mid \mathbf{X}]
+  = \frac{\sum_i (X_i-\bar X)(\beta_0 + \beta_1 X_i)}{S_{XX}}
+  = \beta_1,
+\]
+where the last step uses $\sum_i(X_i-\bar X) = 0$.
+Hence $\hat\beta_1$ is conditionally unbiased given $\mathbf{X}$,
+and therefore unconditionally unbiased: $\E[\hat\beta_1] = \beta_1$.
+
+\begin{remark}[Why condition on $\mathbf{X}$, not on $(\mathbf{X},\mathbf{Y})$?]
+The Probabilist raises a natural question: why do we write $\E[\hat\beta_1 \mid
+\mathbf{X}]$ and not $\E[\hat\beta_1 \mid \mathbf{X}, \mathbf{Y}]$?
+
+Conditioning on the full sample $(\mathbf{X}, \mathbf{Y})$ makes
+$\hat\beta_1$ degenerate: it is a deterministic function of
+$(\mathbf{X}, \mathbf{Y})$, so
+$\E[\hat\beta_1 \mid \mathbf{X}, \mathbf{Y}] = \hat\beta_1$
+trivially. This is true but says nothing about the model or
+the parameter $\beta_1$.
+
+Conditioning on $\mathbf{X}$ alone --- while leaving $\mathbf{Y}$
+random --- is the meaningful question: fix the regressor values and
+ask what $\hat\beta_1$ looks like in expectation over all possible
+response realisations consistent with those $X_i$. This recovers
+the classical fixed-$X$ regression analysis as a conditional
+statement within the random-$X$ framework, and gives a non-trivial
+result: $\E[\hat\beta_1 \mid \mathbf{X}] = \beta_1$.
+
+In this sense, $Y$ is part of the sample but plays a different role
+from $X$: it is the quantity being modelled, not the conditioning
+variable.
+\end{remark}
+
+\subsection{Variance of $\hat\beta_1$ and its relationship to Gauss--Markov}
+
+\textbf{A clarification on purpose (the Probabilist).}
+The derivation of $\Var(\hat\beta_1 \mid \mathbf{X})$ below serves a
+specific purpose: it shows how homoscedasticity enters the estimation
+of that variance. However, the Probabilist points out that the conditional
+variance itself is the central object of the \textbf{Gauss--Markov
+theorem}, not merely a tool for plug-in inference. It is worth
+keeping these two purposes separate.
+
+\textbf{Gauss--Markov theorem (statement).}
+Under the conditions of the linear model with $\E[u_i \mid X_i]=0$
+and homoscedasticity, OLS is \textbf{BLUE}: the Best Linear
+conditionally Unbiased Estimator of $\beta_1$. Here:
+\begin{itemize}
+  \item \textbf{Linear} means linear in $Y = (Y_1,\ldots,Y_n)$.
+        Note: $\hat\beta_1 = \sum w_i Y_i$ with weights $w_i =
+        (X_i-\bar X)/S_{XX}$, so it is linear in $Y$ but
+        \emph{nonlinear} in $X$.
+  \item \textbf{Conditionally unbiased} means $\E[\hat\beta_1 \mid
+        \mathbf{X}] = \beta_1$, as shown in §7.1. This is stronger
+        than unconditional unbiasedness $\E[\hat\beta_1]=\beta_1$
+        (the conditional implies the unconditional by the tower
+        property).
+  \item \textbf{Best} means smallest conditional variance among all
+        linear conditionally unbiased estimators.
+\end{itemize}
+Linearity in $Y$ arises naturally from MSE minimisation: the
+objective is quadratic in $Y$, so the minimiser is linear in $Y$.
+
+\textbf{What breaks without homoscedasticity (the Probabilist's guess).}
+Without homoscedasticity, OLS is no longer BLUE --- some other linear
+conditionally unbiased estimator (GLS with weights $1/\sigma_i^2$)
+achieves smaller conditional variance. What exactly fails: the
+optimality of OLS within the linear class, not its unbiasedness.
+Unbiasedness ($\E[\hat\beta_1 \mid \mathbf{X}]=\beta_1$) holds
+regardless of homoscedasticity, as the derivation in §7.1 did not
+use it. This is the Probabilist's guess; a full proof would require working
+through the Gauss--Markov proof with heteroscedastic $\Omega$.
+
+\textbf{The variance formula.}
+The estimator $\hat\beta_1$ is a function of both $\mathbf{X}$ and
+$\mathbf{Y}$, but its variance $\Var(\hat\beta_1)$ is a number --- a
+parameter of the sampling distribution, determined by the model
+parameters ($\sigma^2$, the distribution of $X$), not by any particular
+realisation. Working conditionally on $\mathbf{X}$ gives a tractable
+intermediate object: the conditional variance $\Var(\hat\beta_1\mid\mathbf{X})$
+is a random variable (it depends on the random $\mathbf{X}$), and the
+unconditional variance is recovered by taking its expectation via the
+law of total variance.  With $w_i = (X_i-\bar X)/S_{XX}$
+deterministic given $\mathbf{X}$:
+\[
+  \hat\beta_1 - \beta_1 = \sum_{i=1}^n w_i\, u_i,
+\]
+and therefore, using conditional independence of $u_i$ given
+$\mathbf{X}$ (from i.i.d.\ pairs) and $\Var(u_i\mid\mathbf{X}) =
+\Var(u_i\mid X_i) = g(X_i)$:
+\begin{equation}
+\label{eq:condvar}
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  = \frac{\sum_{i=1}^n (X_i-\bar X)^2\,g(X_i)}{S_{XX}^2}.
+\end{equation}
+This depends on $\mathbf{X}$ (random), with the unknown function $g$
+as the only unspecified ingredient.
+
+\begin{remark}
+Three i.i.d.\ steps justify \eqref{eq:condvar}: (i) conditioning on
+$\mathbf{X}$ makes $w_i$ deterministic; (ii) pairs are i.i.d., so
+$u_i \perp (X_j,Y_j)$ for $j\neq i$, eliminating cross-terms; (iii)
+$\Var(u_i\mid\mathbf{X}) = \Var(u_i\mid X_i)$ by i.i.d. Each step
+would fail if i.i.d.\ were dropped.
+\end{remark}
+
+\subsection{Under homoscedasticity: what is random, what is a parameter}
+
+Assume $g = \sigma^2$ (homoscedasticity). The fundamental formula gives
+\[
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  = \frac{\sigma^2}{S_{XX}}.
+\]
+
+We now parse every symbol carefully.
+
+\textbf{$\sigma^2$: a parameter.}
+Under homoscedasticity, $\sigma^2 = \Var(u_i \mid X_i)$ is a
+non-random constant — a parameter of the model. It is unknown and
+must be estimated from data.
+
+\textbf{$S_{XX} = \sum(X_i - \bar X)^2$: a random variable.}
+The $X_i$ are random, so $S_{XX}$ is a random variable. Conditional
+on $\mathbf{X}$, it becomes a known scalar.
+
+\textbf{$\Var(\hat\beta_1 \mid \mathbf{X})$: a random variable.}
+The ratio $\sigma^2/S_{XX}$ is a random variable (because $S_{XX}$ is
+random), but with a single unknown scalar $\sigma^2$ as its only
+unspecified ingredient. It is not a parameter — it is a random
+variable. We do not \emph{estimate} it; we \emph{predict} it.
+
+\textbf{Estimating $\sigma^2$ vs.\ predicting $\Var(\hat\beta_1 \mid \mathbf{X})$.}
+What software actually does is the following two-step procedure, which
+mixes estimation and prediction:
+\begin{enumerate}[label=\arabic*.]
+  \item \textbf{Estimate $\sigma^2$} (a parameter) by the unbiased
+        estimator
+        \[
+          \hat\sigma^2 = \frac{1}{n-2}\sum_{i=1}^n \hat u_i^2,
+          \qquad \hat u_i = Y_i - \hat\beta_0 - \hat\beta_1 X_i.
+        \]
+        One can verify $\E[\hat\sigma^2 \mid \mathbf{X}] = \sigma^2$.
+        Here $\hat\sigma^2$ is a statistic — a function of the data,
+        hence a random variable, but an estimator for the non-random
+        parameter $\sigma^2$.
+  \item \textbf{Predict $\Var(\hat\beta_1 \mid \mathbf{X})$} by
+        substituting the estimate $\hat\sigma^2$ for the unknown
+        $\sigma^2$ (plug-in principle):
+        \[
+          \widehat{\Var}(\hat\beta_1 \mid \mathbf{X})
+          = \frac{\hat\sigma^2}{S_{XX}}.
+        \]
+        This is a random variable (function of data), used as a
+        predictor for the random variable $\Var(\hat\beta_1 \mid
+        \mathbf{X}) = \sigma^2/S_{XX}$.
+\end{enumerate}
+
+By default, statistical software (R, Python, Stata) outputs
+$\sqrt{\hat\sigma^2/S_{XX}}$ as the ``standard error'' of
+$\hat\beta_1$. This is valid only under homoscedasticity. Under
+heteroscedasticity the same formula is used but it predicts the
+wrong quantity, as discussed in Section~\ref{sec:hetero}.
+
+\textbf{Confidence intervals as quantile intervals.}
+The $t$-statistic
+\[
+  t = \frac{\hat\beta_1 - \beta_1}{\sqrt{\hat\sigma^2/S_{XX}}}
+\]
+has distribution $t_{n-2}$ conditionally on $\mathbf{X}$ under
+normality of $u$ and under $H_0$. A confidence interval for $\beta_1$
+is in fact a quantile interval: it inverts the quantiles of the
+$t_{n-2}$ distribution. Under normality, this is equivalent to a
+moment-based interval (using the second moment $\hat\sigma^2/S_{XX}$),
+because the $t$ distribution is fully characterised by its degrees of
+freedom. Without normality, the asymptotic ($n\to\infty$) version
+replaces $t_{n-2}$ by $N(0,1)$, and the same plug-in formula applies
+asymptotically.
+
+\subsection{Under heteroscedasticity}
+\label{sec:hetero}
+Suppose $g(X_i) = \sigma_i^2$ varies with $i$ (i.e.\ $g$ is not
+constant). The fundamental formula gives
+\[
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  = \frac{\sum_{i=1}^n (X_i-\bar X)^2\,\sigma_i^2}{S_{XX}^2}.
+\]
+This is the scalar sandwich formula. The numerator weights each
+$\sigma_i^2$ by $(X_i-\bar X)^2$: observations far from $\bar X$
+contribute more to the variance of $\hat\beta_1$.
+
+\textbf{What happens to $\hat\sigma^2$?}
+The quantity $\hat\sigma^2 = \frac{1}{n-2}\sum\hat u_i^2$ remains
+computable, but the parameter it estimates no longer exists: there is no
+single $\sigma^2$ in the model. One can show that
+\[
+  \E[\hat\sigma^2 \mid \mathbf{X}]
+  \approx \sum_{i=1}^n c_i\,\sigma_i^2,
+\]
+where weights $c_i$ depend on $X_i$ through the hat matrix. This is a
+weighted average of the individual $\sigma_i^2$ with no interpretable
+role in the model. The estimand has dissolved.
+
+\textbf{Consequence for inference.}
+The formula $\hat\sigma^2/S_{XX}$ estimates the wrong object: it targets
+$\sigma^2/S_{XX}$, whereas the true conditional variance is the sandwich
+expression above. The two coincide only under homoscedasticity. Under
+heteroscedasticity:
+\begin{itemize}
+  \item $\hat\sigma^2/S_{XX}$ may over- or underestimate
+        $\Var(\hat\beta_1 \mid \mathbf{X})$, depending on the pattern of
+        $\sigma_i^2$ relative to $(X_i-\bar X)^2$.
+  \item The $t$-statistic does not have its nominal distribution under
+        $H_0$; the test is invalid.
+  \item A consistent estimator of the true conditional variance is the
+        Eicker--Huber--White (HC) estimator:
+        \[
+          \widehat{\Var}_{\mathrm{HC}}(\hat\beta_1 \mid \mathbf{X})
+          = \frac{\sum_{i=1}^n (X_i-\bar X)^2\,\hat u_i^2}{S_{XX}^2},
+        \]
+        which replaces $\sigma_i^2$ by $\hat u_i^2$ and is consistent
+        under mild conditions without a homoscedasticity assumption.
+        It is a special case of Newey--West standard errors.
+\end{itemize}
+
+\begin{remark}
+OLS remains conditionally unbiased under heteroscedasticity. The issue
+is not with $\hat\beta_1$ itself but with quantifying its uncertainty.
+The Gauss--Markov theorem (OLS is BLUE among linear unbiased estimators,
+conditionally on $\mathbf{X}$) also fails: GLS with weights $1/\sigma_i^2$
+is more efficient.
+\end{remark}
+
+
+\section{Conditional and Unconditional Variance of the OLS Slope Estimate}
+\label{sec:cond_uncond_var}
+%--------------------------------------------------------------------
+
+This section is not directly about the definition of homoscedasticity,
+but it is central to its application in regression: the variance of the
+OLS slope estimator $\hat\beta_1$, first conditional on the regressors
+$\mathbf{X} = (x_1,\ldots,x_n)$, and then unconditional.
+
+\subsection{Setup and the OLS slope estimator}
+
+Consider the simple linear model
+\[
+  Y_i = \beta_0 + \beta_1 x_i + u_i, \qquad i = 1,\ldots,n,
+\]
+where the $x_i$ are drawn i.i.d.\ from some distribution of $X$,
+and $u_i$ are errors with $\E[u_i \mid X_i] = 0$ and, under
+homoscedasticity, $\E[u_i^2 \mid X_i] = \sigma^2$.
+
+The OLS slope estimator is
+\[
+  \hat\beta_1 = \frac{\sum_i (x_i - \bar x)(y_i - \bar y)}{\sum_i (x_i - \bar x)^2}.
+\]
+
+\subsection{Unbiasedness}
+
+\textbf{Step 1: Conditional expectation of $Y_i$.}
+\[
+  \E[Y_i \mid x_i] = \beta_0 + \beta_1 x_i + \E[u_i \mid x_i] = \beta_0 + \beta_1 x_i.
+\]
+
+\textbf{Step 2: Conditional expectation of $\bar y$.}
+\[
+  \E[\bar y \mid \mathbf{X}]
+  = \frac{1}{n}\sum_i (\beta_0 + \beta_1 x_i)
+  = \beta_0 + \beta_1 \bar x.
+\]
+
+\textbf{Step 3: Plug in and simplify.}
+\begin{align*}
+  \E[\hat\beta_1 \mid \mathbf{X}]
+  &= \frac{1}{\sum_i (x_i-\bar x)^2}\sum_i (x_i-\bar x)
+     \bigl[(\beta_0+\beta_1 x_i) - (\beta_0+\beta_1\bar x)\bigr]
+   = \frac{\beta_1\,S_{XX}}{S_{XX}} = \beta_1.
+\end{align*}
+By the law of iterated expectations, $\E[\hat\beta_1] = \beta_1$: the
+estimator is unbiased both conditionally and unconditionally.
+
+\textbf{Unbiasedness of $\hat\beta_0$.}
+Since $\hat\beta_0 = \bar y - \hat\beta_1 \bar x$:
+\[
+  \E[\hat\beta_0 \mid \mathbf{X}]
+  = (\beta_0 + \beta_1\bar x) - \bar x\,\beta_1 = \beta_0.
+\]
+
+\subsection{Conditional variance of \texorpdfstring{$\hat\beta_1$}{beta-hat\_1}}
+
+Write $\mathring{x}_i = x_i - \bar x$ and $S_{XX} = \sum_i \mathring{x}_i^2$.
+Since $\E[\hat\beta_1 \mid \mathbf{X}] = \beta_1$,
+\[
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  = \E\!\left[(\hat\beta_1 - \beta_1)^2 \mid \mathbf{X}\right]
+  = \E\!\left[\hat\beta_1^2 \mid \mathbf{X}\right] - \beta_1^2.
+\]
+
+Expanding the square in the definition of $\hat\beta_1$:
+\[
+  \E[\hat\beta_1^2 \mid \mathbf{X}]
+  = \frac{1}{S_{XX}^2}
+    \sum_i\sum_j \mathring{x}_i\,\mathring{x}_j\;
+    \E\!\bigl[(y_i-\bar y)(y_j-\bar y)\mid\mathbf{X}\bigr].
+\]
+
+We evaluate the inner expectation separately for $i \neq j$ and $i = j$,
+using the notation $\mathring{u}_i = u_i - \bar u$, so
+$y_i - \bar y = \beta_1\mathring{x}_i + \mathring{u}_i$.
+
+\paragraph{Case 1: $i \neq j$.}
+\begin{align*}
+  \E[(y_i-\bar y)(y_j-\bar y)\mid\mathbf{X}]
+  &= \beta_1^2\mathring{x}_i\mathring{x}_j
+     - \E[u_i\bar u\mid\mathbf{X}]
+     - \E[u_j\bar u\mid\mathbf{X}]
+     + \E[\bar u^2\mid\mathbf{X}].
+\end{align*}
+Under homoscedasticity and uncorrelated errors:
+$\E[u_i\bar u\mid\mathbf{X}] = \sigma^2/n$ and $\E[\bar u^2\mid\mathbf{X}] = \sigma^2/n$.
+Hence this case gives
+\[
+  \beta_1^2\mathring{x}_i\mathring{x}_j - \frac{2\sigma^2}{n} + \frac{\sigma^2}{n}
+  = \beta_1^2\mathring{x}_i\mathring{x}_j - \frac{\sigma^2}{n}.
+\]
+
+\paragraph{Case 2: $i = j$.}
+\begin{align*}
+  \E[(y_i-\bar y)^2\mid\mathbf{X}]
+  &= \beta_1^2\mathring{x}_i^2 + \E[\mathring{u}_i^2\mid\mathbf{X}] \\
+  &= \beta_1^2\mathring{x}_i^2
+     + \sigma^2 - \frac{2\sigma^2}{n} + \frac{\sigma^2}{n}
+   = \beta_1^2\mathring{x}_i^2 + \sigma^2\!\left(1-\tfrac{1}{n}\right).
+\end{align*}
+
+\paragraph{Assembling.}
+Apply the algebraic identity $\sum_i\sum_j a_ia_j = \bigl(\sum_i a_i\bigr)^2$:
+with $a_i = \mathring{x}_i$ this gives $\sum_i\sum_j\mathring{x}_i\mathring{x}_j
+= \bigl(\sum_i\mathring{x}_i\bigr)^2 = 0$; with $a_i = \mathring{x}_i^2$ it
+gives $\sum_i\sum_j\mathring{x}_i^2\mathring{x}_j^2 = S_{XX}^2$.
+
+Collecting all terms:
+\begin{align*}
+  \E[\hat\beta_1^2\mid\mathbf{X}]
+  &= \frac{1}{S_{XX}^2}\Biggl[
+      \beta_1^2 S_{XX}^2
+      - \frac{\sigma^2}{n}\underbrace{\Bigl(\sum_i\mathring{x}_i\Bigr)^{\!2}}_{=\,0}
+      + \sigma^2\!\left(1-\tfrac{1}{n}\right)S_{XX}
+     \Biggr]
+   = \beta_1^2 + \frac{\sigma^2(1-1/n)}{S_{XX}}.
+\end{align*}
+
+Therefore:
+\[
+  \boxed{
+    \Var(\hat\beta_1\mid\mathbf{X})
+    = \frac{\sigma^2\!\left(1 - \dfrac{1}{n}\right)}{S_{XX}}.
+  }
+\]
+
+\subsubsection{Simplification using a standard identity}
+
+The identity $\sum_i(a_i-\bar a)^2 = n(\overline{a^2} - \bar{a}^2)$
+gives $S_{XX} = n(\overline{x^2}-\bar x^2)$, so
+\[
+  \Var(\hat\beta_1\mid\mathbf{X})
+  = \frac{1}{n}\cdot\frac{\sigma^2}{\overline{x^2}-\bar x^2}.
+\]
+
+\subsection{Unconditional variance and \texorpdfstring{$L_2$}{L2} consistency}
+
+By the law of total variance:
+\[
+  \Var(\hat\beta_1)
+  = \E\!\left[\Var(\hat\beta_1\mid\mathbf{X})\right] + \Var\!\left(\underbrace{\E[\hat\beta_1\mid\mathbf{X}]}_{=\,\beta_1}\right)
+  = \sigma^2\!\left(1-\tfrac{1}{n}\right)\E\!\left[\frac{1}{S_{XX}}\right].
+\]
+
+\textbf{Consistency.}
+If the $x_i$ are i.i.d.\ with $\Var X > 0$, then by the LLN,
+$S_{XX}/n \xrightarrow{p} \Var X$, so $S_{XX} \xrightarrow{p} \infty$ and
+\[
+  \Var(\hat\beta_1\mid\mathbf{X})
+  = \frac{\sigma^2(1-1/n)}{S_{XX}} \;\xrightarrow{p}\; 0.
+\]
+Since $\hat\beta_1$ is unbiased, this is equivalent to
+$\E[(\hat\beta_1-\beta_1)^2\mid\mathbf{X}]\to 0$, i.e.\ \emph{conditional
+$L_2$ consistency}.  Taking expectations gives unconditional $L_2$ consistency:
+$\Var(\hat\beta_1)\to 0$.
+
+\begin{remark}
+The i.i.d.\ assumption on $X$ is not strictly necessary.  It suffices
+that $S_{XX}/n$ be bounded away from zero in probability (i.e.\ that
+$n/S_{XX} \xrightarrow{p} 0$).  Under this weaker condition the
+conditional variance still tends to zero, and $L_2$ consistency follows.
+\end{remark}
+
+\begin{remark}[What if homoscedasticity fails?]
+If $\E[u_i^2\mid x_i]=\sigma_i^2$ varies with $i$, the conditional
+variance becomes
+\[
+  \Var(\hat\beta_1\mid\mathbf{X})
+  = \frac{\sum_i\mathring{x}_i^2\,\sigma_i^2}{S_{XX}^2}.
+\]
+OLS remains consistent when this ratio tends to zero, but the standard
+error formula $\hat\sigma^2/S_{XX}$ is invalid.  Heteroscedasticity-robust
+(sandwich/HC) corrections are required.
+\end{remark}
+
+%--------------------------------------------------------------------
+\subsection{\texorpdfstring{$\Var X$ vs $\widehat{\Var} X$}%
+            {Var X vs VarHat X}: plugging in the sample variance}
+\label{sec:varx_varhatx}
+%--------------------------------------------------------------------
+
+Recall from Section~\ref{sec:cond_uncond_var} that under homoscedasticity
+and the i.i.d.\ assumption,
+\[
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  = \frac{1}{n}\cdot\frac{\sigma^2}{\overline{x^2}-\bar x^2}.
+\]
+The denominator $\overline{x^2}-\bar x^2 = \widehat{\Var}(X)$ is the
+sample variance of $X$ (without Bessel correction).  The question is
+whether, for large $n$, we may replace it by the true $\Var X$:
+\[
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  \;\approx\;
+  \frac{1}{n}\cdot\frac{\sigma^2}{(\Var X)^2}.
+\]
+
+\subsubsection{Almost sure convergence of \texorpdfstring{$\widehat{\Var}(X)$}{VarHat X}}
+
+By the strong law of large numbers, for an i.i.d.\ sequence $X_1,X_2,\ldots$
+with $\E X^2 < \infty$:
+\[
+  \widehat{\Var}(X) = \overline{X^2} - \bar X^2
+  \;\xrightarrow{\mathrm{a.s.}}\;
+  \E X^2 - (\E X)^2 = \Var X.
+\]
+Applying a continuous function (squaring) to both sides preserves almost
+sure convergence:
+\[
+  \widehat{\Var}(X) \to \Var X \;\;\mathrm{a.s.}
+  \quad\Longrightarrow\quad
+  \bigl(\widehat{\Var}(X)\bigr)^2 \to (\Var X)^2 \;\;\mathrm{a.s.}
+\]
+Assuming $\Var X \neq 0$, taking reciprocals is also continuous at
+$\Var X$, so
+\[
+  \frac{\sigma^2}{\bigl(\widehat{\Var}(X)\bigr)^2}
+  \;\xrightarrow{\mathrm{a.s.}}\;
+  \frac{\sigma^2}{(\Var X)^2}.
+\]
+
+\begin{remark}[$L_2$ convergence is not guaranteed]
+The Probabilist's warning: almost sure convergence of $\widehat{\Var}(X)$ to
+$\Var X$ does \emph{not} imply $L_2$ convergence of the ratio
+$\sigma^2/(\widehat{\Var}(X))^2$.  $L_2$ would require
+$\E[(\widehat{\Var}(X))^{-4}]<\infty$, which imposes moment conditions
+on $X$ beyond $\E X^2 < \infty$.  The approximation is therefore
+justified almost surely, but not necessarily in mean square.
+\end{remark}
+
+\subsubsection{The stronger statement with factor \texorpdfstring{$n$}{n}}
+
+Without the factor $n$, both terms in the difference
+$\Var(\hat\beta_1\mid\mathbf{X}) - \tfrac{\sigma^2}{n(\Var X)^2}$
+tend to zero individually (each is $O(1/n)$), so their difference
+trivially tends to zero.  The stronger, more informative statement is
+\[
+  n\!\left[\Var(\hat\beta_1\mid\mathbf{X})
+           - \frac{\sigma^2}{n(\Var X)^2}\right]
+  = n\!\left[\frac{\sigma^2}{n(\widehat{\Var}X)^2}
+             - \frac{\sigma^2}{n(\Var X)^2}\right]
+  \;\xrightarrow{\mathrm{a.s.}}\; 0.
+\]
+This says the two expressions agree to leading order in $n$, which
+justifies swapping $\widehat{\Var}X$ for $\Var X$ in the conditional
+variance formula.
+
+\subsubsection{From conditional to unconditional: a general lemma}
+
+Earlier we established that conditional unbiasedness is stronger than
+marginal unbiasedness:
+\[
+  \E[\hat\beta_1 \mid \mathbf{X}] = \beta_1
+  \quad\Longrightarrow\quad
+  \E[\hat\beta_1] = \beta_1.
+\]
+Analogously, by the law of total variance (with the second term
+vanishing because $\E[\hat\beta_1\mid\mathbf{X}]=\beta_1$ is constant):
+\[
+  \E\!\left[\Var(\hat\beta_1\mid\mathbf{X})\right] = \Var(\hat\beta_1).
+\]
+This is a special case of the following general lemma.
+
+\begin{lemma}
+Let $\xi$ and $\eta$ be random variables on a common probability
+space with $\E\xi^2 < \infty$, and suppose
+\[
+  \E[\xi \mid \eta] = \E[\xi].
+\]
+Then
+\[
+  \E\!\left[\Var(\xi\mid\eta)\right] = \Var(\xi).
+\]
+\end{lemma}
+
+\begin{proof}
+By the law of total variance:
+\[
+  \Var(\xi)
+  = \E\!\left[\Var(\xi\mid\eta)\right] + \Var\!\left(\E[\xi\mid\eta]\right).
+\]
+The assumption $\E[\xi\mid\eta] = \E[\xi]$ (a constant) gives
+$\Var(\E[\xi\mid\eta]) = 0$, so
+\[
+  \E\!\left[\Var(\xi\mid\eta)\right] = \Var(\xi). \qedhere
+\]
+\end{proof}
+
+\begin{remark}[Next step: confidence intervals]
+To construct confidence intervals for the regression coefficients,
+we need the unconditional variance of $\hat\beta_1$.  The lemma above,
+together with the approximation
+$\Var(\hat\beta_1\mid\mathbf{X})\approx \sigma^2/[n(\Var X)^2]$,
+gives $\Var(\hat\beta_1)\approx \sigma^2/[n(\Var X)^2]$ as well ---
+the same formula with true $\Var X$ replacing its sample counterpart.
+\end{remark}
+
+%--------------------------------------------------------------------
+\section{Variance Approximation and Confidence Interval for
+         \texorpdfstring{$\hat\beta_1$}{beta-hat\_1}}
+\label{sec:var_approx_ci}
+%--------------------------------------------------------------------
+
+\subsection{Chain of approximations}
+
+We collect the approximations developed in the preceding sections
+into a single chain.
+
+\textbf{Approximation 1} (plug in $\Var X$ for the sample variance,
+a.s.\ justified):
+\[
+  \Var(\hat\beta_1 \mid \mathbf{X})
+  = \frac{\sigma^2(1-1/n)}{S_{XX}}
+  \approx \frac{\sigma^2}{n(\Var X)^2}.
+\]
+
+\textbf{Approximation 2} (pass to unconditional variance via the
+lemma of Section~\ref{sec:varx_varhatx}):
+\[
+  \Var(\hat\beta_1)
+  = \E\!\left[\Var(\hat\beta_1\mid\mathbf{X})\right]
+  \approx \frac{\sigma^2}{n(\Var X)^2}.
+\]
+
+\textbf{Approximation 3} (asymptotic normality by CLT; $\sigma$ and
+$\Var X$ assumed known for now):
+\[
+  \hat\beta_1 \;\approx\; \mathcal{N}\!\left(\beta_1,\,
+    \frac{\sigma^2}{n(\Var X)^2}\right),
+  \qquad\text{i.e.}\qquad
+  \beta_1 - \hat\beta_1 \;\approx\;
+  \mathcal{N}\!\left(0,\, \frac{\sigma^2}{n(\Var X)^2}\right).
+\]
+The distribution is symmetric about zero.
+
+Under these approximations, the $0.95$-quantiles of the pivot
+$\beta_1 - \hat\beta_1$ are $q_{0.025}$ and $q_{0.975}$ of this
+normal, so
+\[
+  P\!\left\{q_{0.025} < \beta_1 - \hat\beta_1 < q_{0.975}\right\}
+  \approx 0.95.
+\]
+Rearranging (adding $\hat\beta_1$ throughout):
+\[
+  P\!\left\{\hat\beta_1 + q_{0.025} < \beta_1 < \hat\beta_1 + q_{0.975}\right\}
+  \approx 0.95,
+\]
+giving the approximate $95\%$ confidence interval
+\[
+  \mathrm{CI}_{0.95}(\beta_1)
+  \approx \left[\hat\beta_1 + q_{0.025},\; \hat\beta_1 + q_{0.975}\right].
+\]
+
+\subsection{Sources of non-exact equality}
+
+Three distinct approximations are layered in the statement above.
+
+\begin{enumerate}
+\item \textbf{Normality assumption.}  If $\E[Y \mid X]$ is normally
+distributed, then the conditional distribution of $\hat\beta_1$ given
+$\mathbf{X}$ is exactly normal.  But normality of $Y \mid X$ may not
+hold; and even when it does, the \emph{unconditional} distribution of
+$\hat\beta_1$ (averaging over the random $\mathbf{X}$) need not be
+exactly normal.  Normality is an asymptotic approximation via the CLT.
+
+\item \textbf{Variance approximation.}  Even under homoscedasticity,
+the exact conditional variance is $\sigma^2(1-1/n)/S_{XX}$, not
+$\sigma^2/[n(\Var X)^2]$.  Replacing $\widehat{\Var}(X)$ by $\Var X$
+is justified almost surely as $n\to\infty$, but introduces a
+discrepancy for finite $n$.
+
+\item \textbf{Plug-in of $\sigma$ and $\Var X$.}  The interval above
+is not yet a statistic: it depends on the unknown parameters $\sigma$
+and $\Var X$.  This is the fourth approximation, discussed next.
+\end{enumerate}
+
+\subsection{The plug-in principle and the fourth approximation}
+
+\subsubsection{Pivotal quantities and confidence intervals: general framework}
+
+\begin{definition}
+Let $\{P_\theta : \theta \in \Theta\}$ be a family of probability
+measures and let $T = T(X_1,\ldots,X_n,\theta)$ be a function of
+both the sample and the parameter.  We call $T$ a
+\textbf{pivotal quantity} (or simply a \emph{pivot}) if its
+distribution is the same for every $P_\theta$ in the family, i.e.\
+the distribution of $T$ does not depend on $\theta$.
+\end{definition}
+
+Several remarks clarify the scope of this definition.
+
+\begin{remark}[Constants are trivial pivots]
+Any constant $c$ is a pivotal quantity: it depends neither on the
+sample nor on the parameter, so its distribution (a point mass at
+$c$) is obviously parameter-free.  Constants are pivots, but
+degenerate ones --- their distribution carries no information and
+cannot be used to form a confidence interval.  The interesting case
+is a pivot with a \emph{non-degenerate} distribution $F$.
+\end{remark}
+
+\begin{remark}[Compensation mechanism]
+The definition does \emph{not} say that $T$ is constant or
+distribution-free in the trivial sense.  Rather, $T$ typically
+\emph{depends} on $\theta$ as a function, but this functional
+dependence on $\theta$ exactly cancels the distributional dependence
+on $\theta$ that the sample $X_1,\ldots,X_n$ carries.  The parameter
+enters $T$ in a way that ``removes'' the parameter from the
+distribution of $T$.  This compensation is the essential non-trivial
+content of pivotality.
+\end{remark}
+
+\begin{remark}[No requirement on the relationship to an estimator]
+The definition says nothing about point estimation: $T$ need not
+involve an estimator $\hat\theta$ at all.  It is a separate,
+additional feature --- important in practice --- that a pivot is
+often built from the difference $\hat\theta - \theta$ (or a
+rescaling thereof).  This is natural because:
+\begin{enumerate}[label=(\roman*)]
+  \item $\hat\theta$ is consistent, so $\hat\theta - \theta$ is
+    ``small'' for large $n$ and concentrates near zero;
+  \item inverting the event $\{q_{\alpha/2} < \hat\theta - \theta <
+    q_{1-\alpha/2}\}$ isolates $\theta$ cleanly, giving a CI.
+\end{enumerate}
+For a \textbf{location parameter} $\theta$ (i.e.\ $X - \theta$ has
+a distribution free of $\theta$), the difference $\hat\theta - \theta$
+is a canonical pivot.  If $\hat\theta$ is the sample mean and $X_i
+\sim \mathcal{N}(\theta,\sigma^2)$ with $\sigma$ known, then
+$\bar X - \theta \sim \mathcal{N}(0,\sigma^2/n)$ exactly, for every
+$n$ --- a genuine (non-asymptotic) pivot.
+\end{remark}
+
+When the pivot has a continuous distribution $F$ with quantiles
+$q_p = F^{-1}(p)$, a $(1-\alpha)$ confidence interval is obtained by
+inverting
+\[
+  P\!\left\{F^{-1}\!\left(\tfrac{\alpha}{2}\right)
+    < \hat\theta_n - \theta
+    < F^{-1}\!\left(1-\tfrac{\alpha}{2}\right)\right\} = 1-\alpha,
+\]
+rearranging to isolate $\theta$:
+\[
+  \mathrm{CI}_{1-\alpha}(\theta)
+  = \left[\hat\theta_n + q_{\alpha/2},\;
+          \hat\theta_n + q_{1-\alpha/2}\right].
+\]
+
+\subsubsection{Monotone transformation of the pivot}
+
+If the pivot $\hat\theta - \theta$ has a fixed but non-standard
+distribution, one may apply a monotone bijection $g$ to obtain a
+better-known pivot $g(\hat\theta - \theta) \sim F$.  Assuming $g$ is
+increasing, inverting gives
+\[
+  g^{-1}\!\left(F^{-1}\!\left(\tfrac{\alpha}{2}\right)\right)
+  < \hat\theta - \theta
+  < g^{-1}\!\left(F^{-1}\!\left(1-\tfrac{\alpha}{2}\right)\right),
+\]
+and the confidence interval becomes
+\[
+  \mathrm{CI}_{1-\alpha}(\theta)
+  = \left[\hat\theta + g^{-1}\!\left(F^{-1}\!\left(\tfrac{\alpha}{2}\right)\right),\;
+          \hat\theta + g^{-1}\!\left(F^{-1}\!\left(1-\tfrac{\alpha}{2}\right)\right)
+    \right].
+\]
+
+\subsubsection{Asymptotic pivot and asymptotic CI}
+
+Two distinct concepts appear here and must be kept separate.
+
+\textbf{Pivotality} is a property relative to the measure family at
+a \emph{fixed} $n$: a statistic $Z_n$ is pivotal if its distribution
+is the same for every $P$ in the family, i.e.\ it does not depend on
+the unknown parameter $\theta$.  This is a statement about one
+distribution, not about a sequence.
+
+\textbf{Stabilisation of a distribution} (convergence in
+distribution) is a property of a \emph{sequence}: $Z_n \xrightarrow{d} Z$
+means the laws of $Z_n$ converge weakly to the law of $Z$ as
+$n\to\infty$.  This says nothing about whether any individual $Z_n$
+is pivotal.
+
+In the typical situation, $\hat\theta_n - \theta$ is \emph{not}
+pivotal at any fixed $n$: its distribution depends on $\theta$.
+A rescaling $h_n$ (e.g.\ $h_n(x) = \sqrt{n}\cdot x$) may remove
+this dependence in the limit:
+\[
+  h_n(\hat\theta_n - \theta) \xrightarrow{d} F,
+\]
+where $F$ does \emph{not} depend on $\theta$ and is non-degenerate.
+This is \emph{asymptotic pivotality}: the rescaled quantity is not
+pivotal for any finite $n$, but its limiting distribution is free of
+$\theta$.  As $n$ grows, the dependence on $\theta$ becomes
+negligible, and in the limit disappears entirely.
+
+If $h_n(\hat\theta_n - \theta)$ is a genuine pivot at every fixed
+$n$ --- i.e.\ its distribution is \emph{exactly} $F$ for every $n$,
+not merely in the limit --- then we have an exact CI for each $n$:
+\[
+  \mathrm{CI}_{n,1-\alpha}(\theta)
+  = \left[\hat\theta_n + h_n^{-1}\!\left(F^{-1}\!\left(\tfrac{\alpha}{2}\right)\right),\;
+          \hat\theta_n + h_n^{-1}\!\left(F^{-1}\!\left(1-\tfrac{\alpha}{2}\right)\right)
+    \right].
+\]
+When the convergence holds only in the limit, the same formula gives
+an \emph{asymptotic} CI --- exact coverage $1-\alpha$ is achieved
+only as $n\to\infty$.  This is the most frequent case in practice.
+The standard choice $h_n(x) = \sqrt{n}\cdot x$ converts consistency
+at rate $1/\sqrt{n}$ into a standard normal asymptotic pivot.
+
+\subsubsection{Approximation 4: plug-in of unknown parameters}
+
+Returning to regression.  Under the three approximations above,
+\[
+  \beta_1 - \hat\beta_1 \;\approx\;
+  \mathcal{N}\!\left(0,\;\frac{\sigma^2}{n(\Var X)^2}\right).
+\]
+This is not yet a pivot: the variance involves the unknown $\sigma$
+and $\Var X$.  The standard errors in the interval
+\[
+  \hat\beta_1 \;\pm\; z_{\alpha/2}\,
+  \frac{\sigma}{\sqrt{n}\,\Var X}
+\]
+are not observable.  To obtain a usable (statistical) interval, we
+apply the \emph{plug-in principle}: replace $\sigma$ and $\Var X$ by
+consistent estimates $\hat\sigma$ and $\widehat{\Var}(X)$:
+\[
+  \hat\beta_1 \;\pm\; z_{\alpha/2}\,
+  \frac{\hat\sigma}{\sqrt{n}\,\widehat{\Var}(X)}.
+\]
+This introduces the fourth approximation.  The resulting interval is
+an asymptotic $(1-\alpha)$ CI for $\beta_1$, valid under
+homoscedasticity, i.i.d.\ $X$, and the moment conditions that
+guarantee consistency of $\hat\sigma$ and $\widehat{\Var}(X)$.
+
+
+
+\end{document}

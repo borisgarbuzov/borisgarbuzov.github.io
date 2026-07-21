@@ -6,7 +6,6 @@ permalink: /notes/
 
 ## 1. FRM preparation. Elements of math finance and stochastic calculus.
 
-
 ### 1.1. Converting between Gaussian and lognormal families: a bridge to Girsanov's theorem
 
 Two strategies for converting between distributions: changing the map (pushforward) vs. reweighting the measure (Radon–Nikodym). Worked through for normal and lognormal families, then lifted to Girsanov's theorem and geometric Brownian motion.
@@ -21,7 +20,6 @@ Limit and supremum definitions of p-variation. Examples with step functions. The
 - [Read on site]({% link _notes/p-variation.md %})
 - [PDF](/assets/papers/p_variation_git_v1.pdf)
 - [TeX Source](/assets/papers/p_variation_git_v1.tex)
-
 
 ## 2. Model validation interview prep
 
@@ -44,7 +42,6 @@ Notes from a conversation with a friend who works in model validation at a Canad
 
 `KS_test.ipynb` is the full runnable version of the simulation sketched in Section 9.6 of the PDF: empirical CDF, KS statistic, Brownian bridge, KS random variable, KS CDF — plus plots of the empirical-vs-theoretical CDF, the simulated KS distribution (CDF and histogram), and a convergence check at n = 10, 100, 1000.
 
-
 ### 2.2. Likelihood: from first principles
 
 The surface f(x,θ) as a single object with two readings. Gaussian, Bernoulli and Poisson families. Triangular and sigmoidal likelihood fences. Fisher information and score function.
@@ -59,7 +56,17 @@ Two approaches to the regression function: Radon–Nikodym derivative and condit
 - [PDF](/assets/papers/glm_foundations_git_v11.pdf)
 - [TeX Source](/assets/papers/glm_foundations_git_v11.tex)
 
+### 2.4 Working Notes in Quantitative Risk and Modeling: Homoscedasticity and Its Testing
 
+These notes began when a friend at a bank shared a model-validation interview
+question on testing for homoscedasticity — one that turned out to require
+conditional expectation, the incidental-parameters problem, pivotal quantities,
+likelihood theory, and the Breusch–Pagan test, enough to fill twelve parts,
+developed jointly with a colleague in probability theory and written as a
+running dialogue between us; it's not a polished treatise, just the record of
+working through a problem in writing.
+
+- [Read on site]({% link _notes/homoscedasticity.md %})
 
 ## 3. Forecasting
 

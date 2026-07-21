@@ -1,0 +1,1085 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\mbF}{\mathcal{F}}
+\newcommand*{\ve}{\varepsilon}
+
+
+
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~7~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries The Lagrange Multiplier Test:\\Why Score and LM Are One Thing}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+\section{The Lagrange Multiplier Method and the LM Test}
+\label{sec:lm}
+
+\subsection{Basic Lagrange multipliers: why the score test carries the name LM}
+\label{subsec:basic-lm}
+
+We follow the Probabilist's notes of June~8, 2026.  Before connecting the score
+test to the LM name, we recall the Lagrange multiplier method
+itself --- purely as a calculus fact, no randomness, no testing yet.
+
+\subsubsection*{Step 1: unconstrained maximisation}
+
+Consider maximising $f(x,y)$ over the full domain $D\subseteq\mathbb{R}^2$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{fig_lm1.png}
+\caption{Figure~1 (the Probabilist, June 8 2026).  Unconstrained problem:
+$f(x,y)\to\max$ over $D$.  The red surface is $f$; the argmax lies
+at the peak.}
+\label{fig:lm1}
+\end{figure}
+
+\subsubsection*{Step 2: general subset constraint}
+
+Now restrict to a subset $\tilde{D}\subseteq D$.  This can only lower
+the maximum:
+\[
+  \tilde{D}\subseteq D \;\Longrightarrow\; \max_{\tilde{D}} f \leq \max_D f.
+\]
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{fig_lm2.png}
+\caption{Figure~2 (the Probabilist).  Constrained problem: $f(x,y)\to\max$
+over $\tilde{D}\subseteq D$ (shaded region).  The constrained maximum
+is at most the unconstrained one.  This general constraint has no
+special relation to LM; it is shown for contrast.}
+\label{fig:lm2}
+\end{figure}
+
+\subsubsection*{Step 3: equality constraint via a smooth function}
+
+Now suppose $\tilde{D}$ is the zero-level set of a smooth function $g$:
+\[
+  \tilde{D} = \{(x,y)\mid g(x,y)=0\}.
+\]
+This reduces the dimension of the feasible set by one.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{fig_lm3.png}
+\caption{Figure~3 (the Probabilist).  The green surface is $g(x,y)$; its
+zero-level set $\tilde{D}=\{g=0\}$ is the curve on the floor.
+The \emph{constraint qualification} $\nabla g\neq 0$ at the
+solution is assumed throughout.}
+\label{fig:lm3}
+\end{figure}
+
+\subsubsection*{Step 4: combining $f$ and the constraint}
+
+Figure~4 overlays $f$ (red) and $g$ (green).  The constrained argmax
+$B=(x^*,y^*,0)$ lies on the floor; the Lagrange multiplier value
+$\lambda^*$ is the third coordinate of the saddle point
+$A=(x^*,y^*,\lambda^*)$ of the Lagrangian.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{fig_lm4.png}
+\caption{Figure~4 (the Probabilist).  Combined picture:
+$A = \max f\!\mid_{g=0} = (x^*,y^*,\lambda^*)$ and
+$B = \operatorname{argmax} f\!\mid_{g=0} = (x^*,y^*,0)$.}
+\label{fig:lm4}
+\end{figure}
+
+\subsubsection*{Step 5: the Lagrangian and the third dimension}
+
+To find $(x^*,y^*)$ we do not enlarge $\tilde{D}$ within $\mathbb{R}^2$.
+Instead we \emph{expand the ambient space} by adding a third
+coordinate $\lambda$, going from $\mathbb{R}^2$ to $\mathbb{R}^3$.
+On this extended space define the \emph{Lagrangian}:
+\[
+  \mathcal{L}(x,y,\lambda) = f(x,y) - \lambda\cdot g(x,y).
+\]
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{fig_lm5.png}
+\caption{Figure~5 (the Probabilist).  The orange hatching shows the
+$\lambda$-``wall'' above the constraint curve.  The unconstrained
+stationary point of $\mathcal{L}$ in $\mathbb{R}^3$ projects onto
+the constrained argmax in $\mathbb{R}^2$.  By the constraint
+qualification, $(x^*,y^*)$ is not a stationary point of $g$ itself.}
+\label{fig:lm5}
+\end{figure}
+
+Setting all three partial derivatives of $\mathcal{L}$ to zero:
+$\partial_\lambda\mathcal{L}=0$ recovers the constraint $g(x,y)=0$;
+$\partial_x\mathcal{L}=0$ and $\partial_y\mathcal{L}=0$ give the
+parallel-gradients condition $\nabla f = \lambda\,\nabla g$.
+
+The value $\lambda^*$ at the solution is the \emph{Lagrange
+multiplier}.  It measures the shadow price of the constraint: how
+much the constrained maximum would increase if $g=0$ were relaxed to
+$g=\varepsilon$.
+
+\medskip\noindent
+\textbf{Connection to the score test.}  In the likelihood context,
+$f = \ell(\theta)$ and the constraint $g(\theta)=0$ encodes the null
+hypothesis $H_0$.  The Lagrange multiplier $\lambda^*$ at the
+restricted MLE $\hat\theta_0$ is proportional to the score
+$\partial_\theta\ell(\hat\theta_0)$.  A large $|\lambda^*|$ means
+the likelihood is straining against the constraint: the data push
+away from $H_0$.  This is exactly what the score test measures,
+which is why ``LM test'' and ``score test'' are two names for the
+same statistic.
+
+\subsection{Basic LM 2: gradient collinearity and level lines}
+\label{subsec:lm_gradient}
+
+We follow the Probabilist's notes of June 9, 2026.  This subsection continues
+the Lagrange multiplier story with the geometric picture of gradient
+collinearity, and connects it to the tangency of level lines.
+
+\medskip
+\noindent\textbf{Step 6: gradient collinearity condition.}
+At the constrained optimum $(x^*, y^*)$, moving along the constraint
+$g = 0$ cannot increase $f$.  This means $\nabla f$ must be
+orthogonal to the constraint curve $\{g=0\}$.  But $\nabla g$ is
+also orthogonal to $\{g=0\}$ (gradient is always perpendicular to
+level sets).  Hence the two gradients must be parallel (collinear):
+\[
+  \nabla f(x^*, y^*) = \lambda^* \nabla g(x^*, y^*).
+\]
+To find $(x^*, y^*)$ we search along the green curve on the floor for
+the point where $\nabla f \parallel \nabla g$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_lm6.png}
+  \caption{The Probabilist's sketch (9 June 2026): the 3-d picture with
+  $\nabla f$ (black) and $\nabla g$ (green) marked at the constrained
+  argmax $B=(x^*,y^*,0)$.  Point $A = (x^*,y^*,\lambda^*)$ is the
+  saddle point of the Lagrangian.}
+\end{figure}
+
+\medskip
+\noindent\textbf{Step 7: gradient collinearity in 2d.}
+Projecting to the $(x,y)$ plane: the constraint $\{g=0\}$ is the
+green ellipse.  At $(x^*,y^*)$ the vector $\nabla g$ is orthogonal
+to the ellipse (outward normal).  The condition $\nabla f \parallel
+\nabla g$ says $\nabla f$ points in the same direction.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.60\textwidth]{fig_lm7.png}
+  \caption{The Probabilist's sketch (9 June 2026): 2-d projection.  At
+  $(x^*,y^*)$ the gradients $\nabla f$ and $\nabla g$ are collinear.
+  $\nabla g$ is orthogonal to the level line of $g$ (green ellipse).}
+\end{figure}
+
+\medskip
+\noindent\textbf{Step 8: raising the level line of $f$.}
+We can cut the surface $f$ at the level $f(x^*,y^*)$ to obtain a
+\emph{raised level line of $f$} — the set of points in 3-d at height
+$f(x^*,y^*)$:
+\[
+  \{(x,y,f(x,y)) \mid f(x,y) = f(x^*,y^*)\}
+  = \{(x,y,f(x^*,y^*)) \mid f(x,y) = f(x^*,y^*)\}.
+\]
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_lm8.png}
+  \caption{The Probabilist's sketch (9 June 2026): the raised level line of $f$
+  (red curve on the surface) passes through $A=(x^*,y^*,z^*)$ where $z^*=f(x^*,y^*)$.
+  Its projection onto the floor gives the level line of $f$.}
+\end{figure}
+
+\medskip
+\noindent\textbf{Step 9: projecting to the floor.}
+Projecting the raised level line down to the $(x,y)$ plane gives the
+ordinary level line of $f$:
+\[
+  \{(x,y) \mid f(x,y) = f(x^*,y^*)\}.
+\]
+This level line passes through $(x^*,y^*)$ by construction.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_lm9.png}
+  \caption{The Probabilist's sketch (9 June 2026): the level line of $f$ (red,
+  $f=f(x^*,y^*)$) shown on the floor together with the constraint
+  curve $g=0$ (green).  Both pass through $(x^*,y^*)$.}
+\end{figure}
+
+\medskip
+\noindent\textbf{Step 10: tangency of level lines.}
+In 2-d, the level line of $f$ and the constraint curve $\{g=0\}$ are
+\emph{tangent} at $(x^*,y^*)$.  Tangency is exactly the geometric
+content of $\nabla f \parallel \nabla g$: both curves share the same
+tangent direction at the contact point, because their normals
+($\nabla f$ and $\nabla g$) coincide up to a scalar.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.60\textwidth]{fig_lm10.png}
+  \caption{The Probabilist's sketch (9 June 2026): level line of $f$
+  ($f = f(x^*,y^*)$, red ellipse) and constraint curve $g=0$ (green
+  ellipse) are tangent at $(x^*,y^*)$.  At the tangency point
+  $\nabla f \parallel \nabla g$.}
+\end{figure}
+
+\noindent\textit{Remark.}
+The Hessian matrix determines whether the constrained stationary
+point is a maximum or minimum of $f$.  If there are $k$ equality
+constraints $g_1=\cdots=g_k=0$, the Lagrangian acquires $k$
+multipliers $\lambda_1,\ldots,\lambda_k$; the number of constraints
+must not exceed the number of variables.  Inequality constraints lead
+to the Kuhn--Tucker conditions, a generalisation not pursued here.
+
+\subsection{Score as a gradient vector}
+
+We follow the Probabilist's notes of June 10, 2026.  So far we have treated the
+score $s(\theta,x)=\partial_\theta\ell(\theta,x)$ in the
+one-dimensional case, where it is a scalar --- the slope of the
+log-likelihood.  For a multivariate parameter $\theta\in\mathbb{R}^p$
+the score becomes a \emph{gradient vector}:
+\[
+  S(\theta,x) = \nabla_\theta\,\ell(\theta,x)
+  = \Bigl(\frac{\partial\ell}{\partial\theta_1},\,
+           \frac{\partial\ell}{\partial\theta_2},\,\ldots,\,
+           \frac{\partial\ell}{\partial\theta_p}\Bigr)^\top.
+\]
+The log-likelihood $\ell(\theta_1,\theta_2)$ is now a surface over the
+parameter plane $(\theta_1,\theta_2)$, and the score $S$ is the
+gradient field of that surface --- a vector field pointing in the
+direction of steepest ascent at each $\theta$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_sv1.png}
+  \caption{The Probabilist's sketch (10 June 2026): the log-likelihood surface
+  $\ell(\theta_1,\theta_2)$ (red) over the $(\theta_1,\theta_2)$
+  plane.  The red lines are hatching of the surface, not gradient
+  arrows.  The green arrow marks the gradient $\nabla\ell$ at a
+  specific point $\theta$.}
+\end{figure}
+
+\noindent\textbf{The score as a map $\mathbb{R}^2\to\mathbb{R}^2$.}
+For $p=2$, the score $S(\theta,x)$ is an operator that takes a point
+$\theta=(\theta_1,\theta_2)$ in parameter space and returns the
+two-dimensional gradient vector $(s_1,s_2)=(\partial_{\theta_1}\ell,
+\partial_{\theta_2}\ell)$.  The left panel shows the domain
+$(\theta_1,\theta_2)$ with a sample point; the right panel shows the
+image $(s_1,s_2)$ in score space.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_sv2.png}
+  \caption{The Probabilist's sketch (10 June 2026): the score as an operator
+  $S\colon\mathbb{R}^2\to\mathbb{R}^2$.  Left: parameter space
+  $(\theta_1,\theta_2)$.  Right: score space $(s_1,s_2)$.  At the
+  MLE, $S=0$ (the score maps to the origin).}
+\end{figure}
+
+\noindent\textbf{The gradient field.}
+Evaluating $S(\theta,x)$ at every $\theta$ in the parameter plane
+produces a gradient vector field.  All arrows point toward the MLE
+(the red dot), where the field vanishes: $S(\hat\theta,x)=0$.  The
+level curves of $\ell$ (red ellipse) are orthogonal to the gradient
+arrows at every point.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\textwidth]{fig_sv3.png}
+  \caption{The Probabilist's sketch (10 June 2026): gradient field of
+  $\ell(\theta_1,\theta_2)$ over the parameter plane.  Green arrows
+  show $\nabla\ell$ at a grid of points; all arrows converge on the
+  MLE (red dot).  The red ellipse is a level curve of $\ell$.}
+\end{figure}
+
+\noindent\textbf{The two component surfaces $s_1$ and $s_2$.}
+Each component $s_k(\theta,x)=\partial_{\theta_k}\ell(\theta,x)$ can
+be drawn as a separate surface over $(\theta_1,\theta_2)$.  When
+$\omega$ (a random draw from the sampling distribution) is plugged in
+for $x$, the likelihood $\ell(\theta,\omega)$ becomes a random
+surface, realised more often near high-density regions of the
+native measure.  Consequently, $S(\theta,\omega)$ is a random vector,
+and $s_1(\theta,\omega)$, $s_2(\theta,\omega)$ are two random
+surfaces.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_sv4.png}
+  \caption{The Probabilist's sketch (10 June 2026): the two component surfaces
+  $s_1(\theta_1,\theta_2)$ (left) and $s_2(\theta_1,\theta_2)$
+  (right) of the score vector.  Each surface is bowl-shaped; the
+  minimum of each component (green dot) lies at the MLE
+  $(\theta_1^*,\theta_2^*)$.  When the data point $\omega$ is random,
+  these surfaces are random.}
+\end{figure}
+
+\subsection{LM and score test: the one-dimensional case}
+
+We follow notes of June 9, 2026.  We work through the simplest
+possible case --- a scalar parameter $\theta\in\mathbb{R}$, simple
+null $H_0:\theta=\theta_0$ --- in order to see concretely how the
+Lagrangian, the score, and the LM statistic fit together, even when
+the problem is trivially solvable without any of this machinery.
+
+\medskip
+\noindent\textbf{The log-likelihood as a parabola.}
+For $X_1,\ldots,X_n\overset{\mathrm{iid}}{\sim}\mathcal{N}(\theta,1)$
+the log-likelihood (up to a constant) is
+\[
+  \ell(\theta) = -\tfrac{n}{2}(\theta-\bar x)^2,
+\]
+a downward-opening parabola in $\theta$ with vertex at
+$\hat\theta_{\mathrm{MLE}}=\bar x$.  No constraints --- no Lagrangian
+needed for unconstrained maximisation.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{fig_lms1.png}
+  \caption{Sketch: the log-likelihood $\ell(\theta)$ (red parabola)
+  as a function of $\theta$.  The vertex is at
+  $\hat\theta_{\mathrm{MLE}}=\bar x$.  The blue curve is an
+  alternative sample realisation.}
+\end{figure}
+
+\medskip
+\noindent\textbf{Adding the null hypothesis $\theta=\theta_0$.}
+We mark $\theta_0$ on the same graph and read off $\ell(\theta_0)$
+(green dot, value $-a$ for some $a\geq 0$).  The constrained
+``argmax'' under $H_0:\theta=\theta_0$ is trivially $\tilde\theta=\theta_0$
+--- the constraint $\{g=0\}=\{\theta_0\}$ is a single point, so no
+optimisation is needed.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.60\textwidth]{fig_lms2.png}
+  \caption{Sketch: $\theta_0$ marked on the $\theta$-axis; the green
+  dot shows $\ell(\theta_0)=-a$.  The constrained maximum is at this
+  single point.}
+\end{figure}
+
+\medskip
+\noindent\textbf{The constraint as a subset of $\mathbb{R}$.}
+In the scalar case the constraint $\{g(\theta)=0\}$ is generically a
+finite set of points on the real line.  For
+$g(\theta)=\theta-\theta_0$ it is the single point $\theta_0$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.70\textwidth]{fig_lms3.png}
+  \caption{Sketch: the real line with $\theta_0$ marked.  The
+  feasible set $\{g=0\}$ is this single point; the constraint reduces
+  the one-dimensional domain to a zero-dimensional one.}
+\end{figure}
+
+\medskip
+\noindent\textbf{The constraint function $g$ and its negation.}
+The function $g(\theta)=\theta-\theta_0$ is an affine function of
+$\theta$ (left panel below).  Its negation $-g(\theta)=\theta_0-\theta$
+is equally valid as a constraint function: $\{g=0\}=\{-g=0\}$.
+However, the two choices give \emph{different} Lagrangians
+$\ell - \lambda g$ and $\ell - \lambda(-g)$, related by
+$\lambda_1 = -\lambda_2$.  The zero set is the same; only the sign
+convention for $\lambda^*$ changes.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.75\textwidth]{fig_lms4.png}
+  \caption{Left: $g(\theta)=\theta-\theta_0$ (red line, zero at
+  $\theta_0$).  Right: $-g(\theta)=\theta_0-\theta$.  Both have the
+  same zero set $\{\theta_0\}$; they produce Lagrangians whose
+  multipliers differ in sign.}
+\end{figure}
+
+\medskip
+\noindent\textbf{The Lagrangian in 3d.}
+Even in the scalar case we can write the Lagrangian
+$\mathcal{L}(\theta,\lambda)=\ell(\theta)-\lambda\,g(\theta)$, which
+is a function of two variables $(\theta,\lambda)\in\mathbb{R}^2$.
+The term $-\lambda g(\theta)=-\lambda(\theta-\theta_0)$ is a
+\emph{bilinear} (saddle-shaped) surface $z=xy$ (after recentring).
+Its rulings --- the generating straight lines --- are the families
+\[
+  \{z = x\,y_0,\ x\in\mathbb{R}\}\quad\text{and}\quad
+  \{z = x_0\,y,\ y\in\mathbb{R}\}
+\]
+for fixed $x_0,y_0\in\mathbb{R}$.  One such ruling is shown in blue
+on the red surface below.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\textwidth]{fig_lms5.png}
+  \caption{The surface $z=\lambda\cdot g(\theta)=\lambda(\theta-\theta_0)$
+  (red saddle surface); one ruling (generating line) shown in blue.
+  This is the ``LM component'' of the Lagrangian.}
+\end{figure}
+
+\medskip
+\noindent\textbf{The full Lagrangian in 3d.}
+Adding $\ell(\theta)$ (a univariate parabola, constant in $\lambda$,
+so it appears as a ``cylindrical'' ridge in 3d) to the saddle surface
+$-\lambda g(\theta)$ gives the full Lagrangian surface
+$\mathcal{L}(\theta,\lambda)$.  The red parabolic ridge is
+$\ell(\theta)$; the blue plane is the LM component at a specific
+$\lambda$; the green segment marks the stationary point
+$(\tilde\theta,\lambda^*)=(\theta_0,\ell'(\theta_0))$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_lms6.png}
+  \caption{The Lagrangian $\mathcal{L}(\theta,\lambda)$ in 3d.  Red:
+  the parabolic log-likelihood ridge $\ell(\theta)$, constant in
+  $\lambda$.  Blue: the LM component $-\lambda g(\theta)$ (tilted
+  plane).  Green: the stationary point at $\tilde\theta=\theta_0$,
+  $\lambda^*=\ell'(\theta_0)=n(\bar x-\theta_0)$.  If $H_0$ is true,
+  $\lambda^*\approx 0$ and the Lagrangian is nearly flat in $\theta$
+  at $\theta_0$.}
+\end{figure}
+
+\noindent\textbf{Summary.}
+In the scalar one-parameter case the constrained argmax is trivial
+(a single point), and the Lagrangian is not needed for solving the
+problem.  Nevertheless the formalism applies: the stationary-point
+condition $\partial_\theta\mathcal{L}=0$ gives
+$\lambda^*=\ell'(\theta_0)=s(\theta_0)$, the score at the null.
+This is the LM/score test statistic (before normalisation by
+Fisher information).  The LM test and the score test are the same
+statistic, and in this univariate case they coincide with the Wald
+test as well.
+
+\bigskip
+
+%--------------------------------------------------------------------
+\subsection{Full visualisation: normal example with explicit constants}
+\label{subsec:lm_normal_full}
+%--------------------------------------------------------------------
+
+We now draw everything with explicit numbers from the normal example.
+Take $x_1 = 1$ (single observation), true parameter $\theta_0 = 2$,
+and the constraint $g(\theta) = \theta - \theta_0 = \theta - 2$.
+The log-likelihood is
+\[
+  \ell(\theta) = -\tfrac{1}{2}\ln(2\pi) - \tfrac{1}{2}(1-\theta)^2,
+\]
+and the Lagrangian is
+\[
+  \mathcal{L}(\theta,\lambda)
+  = -\tfrac{1}{2}\ln(2\pi) - \tfrac{1}{2}(1-\theta)^2 - \lambda(\theta - 2).
+\]
+
+\paragraph{The full Lagrangian and the stationary point.}
+Setting $\nabla\mathcal{L} = 0$:
+\[
+  \begin{cases}
+    \dfrac{\partial\mathcal{L}}{\partial\theta}
+    = -\tfrac{1}{2}\cdot 2(1-\theta)(-1) - \lambda
+    = (1-\theta) - \lambda = 0,\\[6pt]
+    \dfrac{\partial\mathcal{L}}{\partial\lambda}
+    = -(\theta - 2) = 0.
+  \end{cases}
+\]
+The second equation gives $\theta^* = 2$; substituting into the first:
+$1 - 2 - \lambda = 0$, so $\lambda^* = -1$.
+The stationary point is $(\theta^*, \lambda^*) = (2, -1)$.
+
+Reading off: $\lambda^* = \ell'(\theta_0) = (1 - \theta_0) = 1 - 2 = -1$
+--- the score at the null $\theta_0 = 2$ evaluated at the single
+observation $x_1 = 1$.  This is negative because $x_1 < \theta_0$:
+the data point lies below the null, so the log-likelihood slopes
+downward at $\theta_0$.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_lms_full_lagrangian_saddle.png}
+  \caption{The full Lagrangian $\mathcal{L}(\theta,\lambda)
+  = -\tfrac{1}{2}\ln(2\pi) - \tfrac{1}{2}(1-\theta)^2
+  - \lambda(\theta-2)$ for the normal example ($x_1=1$, $\theta_0=2$).
+  The blue marker indicates the stationary point at
+  $(\theta^*,\lambda^*)=(2,-1)$.
+  The surface looks very similar to the $\lambda g$ term alone:
+  $\lambda g$ sets the dominant saddle shape, and adding the
+  univariate $\ell(\theta)$ (a parabolic ridge, constant in $\lambda$)
+  merely shifts the saddle point from $(2,0)$ to $(2,-1)$.
+  The value $\lambda^*=-1 = \ell'(\theta_0) = x_1 - \theta_0$
+  is the score at the null --- the LM test statistic before
+  normalisation by Fisher information.}
+\end{figure}
+
+\begin{remark}
+The observation that the full Lagrangian looks very similar to the
+$\lambda g$ component is not a coincidence for this example.
+$\lambda g(\theta)=\lambda(\theta-2)$ is bilinear in $(\theta,\lambda)$
+and dominates the shape; the correction $\ell(\theta)$ is a function
+of $\theta$ alone (a parabola, independent of $\lambda$), so it enters
+as a $\lambda$-invariant ridge that bends the $\theta$-sections without
+affecting the saddle structure.  In general, when $\ell$ is approximately
+quadratic near $\theta_0$, this additive decomposition
+$\mathcal{L} = \ell + (-\lambda g)$ cleanly separates shape (saddle, from
+$\lambda g$) and location shift (from $\ell$).
+\end{remark}
+
+%--------------------------------------------------------------------
+\subsection{The Lagrange multiplier at the saddle equals the score at the null}
+\label{subsec:lm_lemma}
+%--------------------------------------------------------------------
+
+The two worked examples (normal and exponential) both gave
+$\lambda^* = \ell'(\theta_0)$.  This is not a coincidence —
+it is a direct consequence of the stationarity conditions for
+the Lagrangian, and holds for any differentiable log-likelihood
+with any simple null hypothesis.
+
+\paragraph{The identity.}
+Take any differentiable function $f:\mathbb{R}\to\mathbb{R}$,
+a point constraint $x = x_0$, and the Lagrangian
+\[
+  \mathcal{L}(x,\lambda) = f(x) - \lambda\,(x - x_0).
+\]
+At any stationary point $\nabla\mathcal{L} = 0$:
+\[
+  \frac{\partial\mathcal{L}}{\partial\lambda} = -(x - x_0) = 0
+  \implies x^* = x_0,
+  \qquad
+  \frac{\partial\mathcal{L}}{\partial x} = f'(x) - \lambda = 0
+  \implies \lambda^* = f'(x_0).
+\]
+So the Lagrange multiplier at the saddle equals the derivative of $f$
+at the constraint point — period.
+
+Applied to the log-likelihood $\ell(\theta)$ with null $H_0:\theta=\theta_0$:
+\[
+  \boxed{\lambda^* = \ell'(\theta_0) = s(\theta_0).}
+\]
+The score at the null \emph{is} the Lagrange multiplier at the
+saddle point of the Lagrangian.  The LM test checks whether this
+multiplier is close to zero: a large $|\lambda^*|$ means
+the log-likelihood is steeply sloped at $\theta_0$, so the data
+pull strongly away from the null.
+
+\begin{remark}
+Existence: the stationary point with $x^* = x_0$ always exists
+as long as $f'(x_0)$ is defined.  Uniqueness of $\lambda^*$
+follows immediately: $\lambda^* = f'(x_0)$ is a single number.
+If $\ell(\theta)$ is monotone (no interior MLE), there is still a
+well-defined stationary point $(\theta_0,\, \ell'(\theta_0))$ of the
+Lagrangian, and the LM test still makes sense — it simply registers
+a large slope at $\theta_0$.
+\end{remark}
+
+\paragraph{Graphical illustration.}
+The identity $\lambda^* = s(\theta_0)$ is hard to illustrate
+directly because it equates a \emph{slope} on the 2-d
+$\ell(\theta)$ graph with a \emph{coordinate} on the 3-d
+Lagrangian surface.  The two figures below show both views
+simultaneously for the exponential example ($x_1=2$, $\theta_0=1$,
+$\lambda^* = s(\theta_0) = 1/\theta_0 - x_1 = -1$).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\textwidth]{fig_score_slope_2d.png}
+  \caption{2-d view: the log-likelihood $\ell(\theta) = \ln\theta - 2\theta$
+  for $x_1 = 2$.  The black tangent line at $\theta_0 = 1$ has slope
+  $\ell'(1) = 1/1 - 2 = -1$.  The red right-triangle shows rise$/$run
+  $= -1$: one unit right, one unit down.  This slope is $\lambda^*$.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\textwidth]{fig_lambda_saddle_3d.png}
+  \caption{3-d view: the full Lagrangian surface
+  $\mathcal{L}(\theta,\lambda) = \ln\theta - 2\theta - \lambda(\theta-1)$.
+  The red dot marks the point on the surface directly above the
+  saddle; the blue dot on the floor is the saddle projection
+  $(\theta^*, \lambda^*) = (1, -1)$, connected by a blue dashed
+  vertical.  The red horizontal line at $\lambda = -1$ on the
+  $\lambda$-axis identifies the multiplier value.
+  Reading off the floor: the $\lambda$-coordinate of the saddle
+  is $-1$ — the same number as the slope in the 2-d picture.}
+\end{figure}
+
+%--------------------------------------------------------------------
+\subsection{Why ``LM test'' and ``score test'' are two names for one thing}
+\label{subsec:lm_naming}
+%--------------------------------------------------------------------
+
+\paragraph{The score test stands on its own.}
+The score test does not need Lagrangians to be defined, computed,
+or justified.  Given a log-likelihood $\ell(\theta)$ and a null
+$H_0:\theta=\theta_0$, the test statistic is simply
+\[
+  \xi_{LM}
+  = \frac{[s(\theta_0)]^2}{\mathcal{I}(\theta_0)}
+  = \frac{[\ell'(\theta_0)]^2}{\mathcal{I}(\theta_0)}
+  \xrightarrow{d} \chi^2_1 \quad \text{under } H_0.
+\]
+The score $s(\theta_0)$ is evaluated \emph{at the null} $\theta_0$,
+not at the MLE $\hat\theta$ (where $s(\hat\theta)=0$ by definition,
+making the statistic trivially zero).
+The Fisher information $\mathcal{I}(\theta_0)$ in the denominator
+normalises the score to unit variance, so that the squared
+standardised score has a $\chi^2_1$ limit by the CLT.
+
+\paragraph{Where the name ``LM'' comes from.}
+Silvey (1959) derived the same statistic via a Lagrangian argument:
+constrain $\ell(\theta)$ to $H_0$ using a multiplier $\lambda$,
+find the saddle point of the Lagrangian, and read off $\lambda^*$.
+The result of this section shows that $\lambda^* = s(\theta_0)$,
+so the Lagrange multiplier \emph{is} the score at the null.
+Engle (1984) proved the asymptotic equivalence of all three tests
+(Wald, LR, Score/LM) and established the name ``LM test'' alongside
+``score test'' as synonyms.  The Lagrangian machinery adds no
+computational content --- it only explains the name.
+
+\paragraph{Shadow price interpretation (a remark on language).}
+$\lambda^*$ is sometimes called the \emph{shadow price} of the
+constraint.  In the inequality-constraint literature ``relaxation''
+means moving from $g\le 0$ to $g\le\varepsilon$.  For our equality
+constraint $\theta=\theta_0$ there is no relaxation in that sense;
+instead the shadow price measures the rate of change of the
+constrained optimum when the constraint level is \emph{shifted}:
+\[
+  \frac{d}{d\varepsilon}
+  \max_{\theta:\,\theta=\theta_0+\varepsilon}\ell(\theta)
+  \bigg|_{\varepsilon=0}
+  = \ell'(\theta_0) = \lambda^*.
+\]
+A large $|\lambda^*|$ means the constrained optimum is sensitive
+to where exactly we place $\theta_0$: the data push hard away from
+the null, and the LM test detects this.
+
+%--------------------------------------------------------------------
+\subsection{Worked example: exponential distribution}
+\label{subsec:lm_exp}
+%--------------------------------------------------------------------
+
+We repeat the full LM story for the exponential family, which has
+non-quadratic log-likelihood and provides a useful contrast to the
+normal case.
+
+\paragraph{Setup.}
+The exponential density with rate parameter $\theta > 0$ is
+\[
+  f_\theta(x) = \mathbf{1}_{x\ge 0}\cdot\theta\,e^{-\theta x}.
+\]
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{fig_exp1_density.png}
+  \caption{Exponential density $f_\theta(x) = \theta e^{-\theta x}$
+  for $x\ge 0$.  The density starts at height $\theta$ and decays
+  exponentially; the $y$-intercept equals the rate parameter.}
+\end{figure}
+
+\paragraph{Likelihood and log-likelihood surfaces.}
+For a single observation $x_1$ the likelihood is
+$L_x(\theta) = \theta e^{-\theta x}$ and the log-likelihood is
+\[
+  \ell_x(\theta) = \ln\theta - \theta x.
+\]
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp2_lik3d.png}
+  \caption{The likelihood surface $z = \theta e^{-\theta x}$
+  over the $(\theta, x)$ plane ($x=\theta$ axis, $y=x_1$ axis).
+  The surface rises steeply near $\theta=0$ for small $x_1$ and
+  decays in both directions.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp3_loglik3d.png}
+  \caption{The log-likelihood surface $z = \ln\theta - \theta x$
+  over the $(\theta, x)$ plane.  The surface goes to $-\infty$
+  as $\theta\to 0^+$ (from the $\ln\theta$ term) and to $-\infty$
+  as $\theta\to+\infty$ (from the $-\theta x$ term), so each
+  $x_1$-section has a unique interior maximum.  The plot window
+  must be restricted to small $\theta$ (e.g.\ $\theta\in(0,3]$)
+  to make the $\ln\theta\to-\infty$ singularity visible; at large
+  $\theta$ it is compressed into a narrow strip near the left edge.}
+\end{figure}
+
+\paragraph{MLE.}
+Maximising $\ell_x(\theta) = \ln\theta - \theta x$ over $\theta > 0$:
+\[
+  \frac{d\ell}{d\theta} = \frac{1}{\theta} - x = 0
+  \implies \hat\theta_{\mathrm{MLE}} = \frac{1}{x}.
+\]
+The MLE is the reciprocal of the observation.  As a function of $x_1$
+it is a hyperbola: larger observations shift the rate estimate downward.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\textwidth]{fig_exp4_mle2d.png}
+  \caption{The MLE $\hat\theta = 1/x_1$ as a function of the
+  observation $x_1 > 0$.  The curve is a rectangular hyperbola
+  with vertical asymptote at $x_1=0$.}
+\end{figure}
+
+\paragraph{Specific case: $x_1 = 2$.}
+With $x_1 = 2$ the MLE is $\hat\theta = 1/2$, and the log-likelihood
+reduces to
+\[
+  \ell(\theta)\big|_{x_1=2} = \ln\theta - 2\theta.
+\]
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp5_mle3d.png}
+  \caption{The log-likelihood surface $z = \ln\theta - \theta x_1$
+  with the MLE ridge $\hat\theta = 1/x_1$ marked (blue curve on the
+  surface).  Each vertical cross-section at fixed $x_1$ achieves its
+  maximum at $\theta = 1/x_1$; the ridge traces the argmax as $x_1$
+  varies.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp6_loglik2d.png}
+  \caption{The one-dimensional log-likelihood $\ell(\theta)=\ln\theta-2\theta$
+  for $x_1=2$.  The function goes to $-\infty$ as $\theta\to 0^+$,
+  rises to its maximum at $\hat\theta = 1/2$, then decreases to
+  $-\infty$ as $\theta\to+\infty$.  Argmax: $\theta = 1/2$.}
+\end{figure}
+
+\paragraph{Lagrangian setup.}
+Set the null $\theta_0 = 1$ and the constraint
+$g(\theta) = \theta - \theta_0 = \theta - 1$.
+The Lagrangian is
+\[
+  \mathcal{L}(\theta,\lambda)
+  = \underbrace{\ln\theta - 2\theta}_{\ell(\theta)}
+    - \lambda(\theta - 1).
+\]
+The second term alone is $T = \lambda(\theta-1) = \lambda\theta - \lambda$,
+a bilinear (saddle) surface.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp7_loglik_lambda3d.png}
+  \caption{The log-likelihood surface $z = \ln\theta - 2\theta$
+  extended trivially in the $\lambda$ direction (constant in $\lambda$).
+  This is the $\ell(\theta)$ component of the Lagrangian viewed
+  in $(\theta,\lambda)$ space: a ridge parallel to the $\lambda$-axis
+  with peak at $\hat\theta = 1/2$.}
+\end{figure}
+
+\paragraph{The constraint term and its saddle.}
+The second term $T(\theta,\lambda) = \lambda(\theta-1)$ is a bilinear
+surface.  Setting $\nabla T = 0$:
+\[
+  \begin{cases}
+    \dfrac{\partial T}{\partial\theta} = \lambda = 0,\\[4pt]
+    \dfrac{\partial T}{\partial\lambda} = \theta - 1 = 0,
+  \end{cases}
+  \implies (\theta^*, \lambda^*) = (1,\, 0).
+\]
+The saddle of the constraint term alone sits at $(\theta_0, 0)$; adding
+$\ell(\theta)$ will shift the $\lambda$-coordinate of the stationary
+point, while leaving $\theta^* = \theta_0$ unchanged.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp8_constraint3d.png}
+  \caption{The constraint term $T(\theta,\lambda) = \lambda(\theta-1)$
+  as a 3-d surface (familiar bilinear saddle).
+  Saddle point at $(\theta,\lambda) = (1, 0)$ with $T = 0$.}
+\end{figure}
+
+\paragraph{Full Lagrangian and stationary point.}
+Setting $\nabla\mathcal{L} = 0$:
+\[
+  \begin{cases}
+    \dfrac{\partial\mathcal{L}}{\partial\theta}
+      = \dfrac{1}{\theta} - 2 - \lambda = 0,\\[8pt]
+    \dfrac{\partial\mathcal{L}}{\partial\lambda}
+      = -(\theta - 1) = 0.
+  \end{cases}
+\]
+The second equation gives $\theta^* = 1 = \theta_0$.
+Substituting into the first: $1/1 - 2 - \lambda = 0$, so
+$\lambda^* = -1$.
+
+The stationary point is $(\theta^*, \lambda^*) = (1,\,-1)$.
+Crucially, $\lambda^* = -1 = \ell'(\theta_0) = 1/\theta_0 - x_1
+= 1/1 - 2 = -1$: the Lagrange multiplier at the constrained
+optimum equals the score evaluated at the null.
+This is the LM test statistic (before normalisation).
+
+The Fisher information for $\mathrm{Exp}(\theta)$ is
+$\mathcal{I}(\theta) = 1/\theta^2$, so at $\theta_0 = 1$:
+$\mathcal{I}(\theta_0) = 1$.  The normalised LM statistic is
+\[
+  \xi_{LM}
+  = \frac{[\ell'(\theta_0)]^2}{\mathcal{I}(\theta_0)}
+  = \frac{(-1)^2}{1} = 1.
+\]
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp9_lagrangian3d.png}
+  \caption{The full Lagrangian $z = \ln\theta - 2\theta - \lambda(\theta-1)$
+  for $x_1=2$, $\theta_0=1$.  The surface looks dominated by the
+  univariate $\ell(\theta)$ component (the ridge shape), making
+  the saddle point hard to read off visually.}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\textwidth]{fig_exp10_lagrangian_annotated.png}
+  \caption{The full Lagrangian surface annotated with the stationary
+  point $(\theta^*, \lambda^*) = (1, -1)$ (blue marker on the floor).
+  The saddle is invisible from visual inspection alone; finding it
+  requires solving $\nabla\mathcal{L}=0$ by hand.
+  The $\lambda^* = -1$ is the score $\ell'(\theta_0) = 1/\theta_0 - x_1
+  = -1$: negative because $x_1 = 2 > 1/\theta_0 = 1$, i.e.\ the
+  observation exceeds the reciprocal of the null rate, pushing the
+  MLE below $\theta_0$ and putting the log-likelihood on a downward
+  slope at $\theta_0$.}
+\end{figure}
+
+\begin{remark}
+  Comparison with the normal example.  In both cases
+  $\lambda^* = \ell'(\theta_0) = s(\theta_0)$, the score at the
+  null.  For the normal case ($x_1=1$, $\theta_0=2$) we obtained
+  $\lambda^* = x_1 - \theta_0 = -1$.
+  For the exponential case ($x_1=2$, $\theta_0=1$) we obtain
+  $\lambda^* = 1/\theta_0 - x_1 = -1$.
+  The numerical values coincide by coincidence; the structure is
+  universal: $\lambda^* = s(\theta_0)$ always, and the LM test
+  checks whether this value is close to zero.
+\end{remark}
+
+%--------------------------------------------------------------------
+\subsection{Two questions on Lagrangian theory}
+\label{subsec:lm_theory_questions}
+%--------------------------------------------------------------------
+
+Two conceptual questions arose while working through the examples
+above.  Both concern what can be said about the Lagrangian's
+stationary point \emph{without} doing the computation --- purely
+from the shape of $f$ and $g$.
+
+\paragraph{Question 1: directional behaviour at the saddle.}
+The Lagrangian $\mathcal{L}(\theta,\lambda)=f(\theta)-\lambda g(\theta)$
+has no local optima of its own --- only a stationary point, which is
+generically a genuine saddle (one direction up, one direction down).
+Can the directional behaviour be read off in advance, from $f$ and
+$g$ alone, without solving for $(\theta^*,\lambda^*)$?
+
+\emph{An important correction first.}
+In the scalar examples used throughout this section ($\theta\in\mathbb{R}$,
+single point constraint $g(\theta)=\theta-\theta_0$), the constraint
+set $\{g=0\}=\{\theta_0\}$ is a single point: a $0$-dimensional
+manifold.  There is no room to ``move along the constraint,'' so
+the restricted function $\tilde f$ (Question 2's object) has no
+interior direction to differentiate.  To ask a meaningful question
+about \emph{directional} behaviour of $\tilde f$ near the
+constrained optimum, we need at least one free direction left on
+the constraint set --- i.e.\ a vector parameter
+$\theta=(\theta_1,\theta_2)\in\mathbb{R}^2$ with a single scalar
+constraint $g(\theta_1,\theta_2)=0$, exactly the setup of
+the Probabilist's original Lagrange-multiplier pictures (\S\ref{subsec:basic-lm}--%
+\ref{subsec:lm_gradient}: $f(x,y)$, constraint curve $\{g=0\}$).
+We work in that setting here, writing $\theta=(x,y)$ to match those
+figures.
+
+\emph{Part 1: every Lagrangian is affine in each multiplier.}
+For $k$ constraints $g_1,\ldots,g_k$, the Lagrangian
+$\mathcal{L}=f-\sum_j \lambda_j g_j$ is affine in each $\lambda_j$
+separately (holding $\theta$ and the other multipliers fixed):
+$\lambda_j \mapsto f(\theta) - \lambda_j g_j(\theta) - (\text{const.})$.
+An affine function's graph is a straight line, so the generating
+curves of the Lagrangian surface along any $\lambda_j$-direction
+are always straight lines (the ``rulings'' of the saddle seen in
+Figure~26).  At a stationary point, $g_j(\theta^*)=0$ for every $j$
+(the constraints hold), so each of these affine sections has slope
+$-g_j(\theta^*) = 0$: the line is horizontal.  This confirms and
+generalises the earlier finding: the flat ``seam'' along each
+$\lambda_j$-direction through the solution is not a coincidence
+of the one-constraint case --- it holds for any number of
+constraints, by the same one-line argument.
+
+\emph{Part 2: fixing $\lambda=\lambda^*$ and varying $\theta$ near $\theta^*$.}
+Now fix $\lambda=\lambda^*$ and ask about the $\theta$-behaviour of
+$\mathcal{L}(\cdot,\lambda^*)$ near $\theta^*$, in relation to the
+restricted function $\tilde f$ on the constraint curve
+$\{g=0\}$ introduced in Question~2.  Write $\tilde\theta^*$ for the
+point on the curve corresponding to $\theta^*$ (so
+$\tilde f(\tilde\theta^*) = f(\theta^*)$).  Since $g(\theta^*)=0$,
+\[
+  f(\theta^*) = \tilde f(\tilde\theta^*) = \mathcal{L}(\theta^*,\lambda^*).
+\]
+The three quantities agree \emph{at the point}, but this does not
+mean $f$, $\tilde f$, and $\mathcal{L}(\cdot,\lambda^*)$ behave alike
+\emph{around} the point --- they are functions on different domains
+($f$ and $\mathcal{L}(\cdot,\lambda^*)$ on the full ambient space,
+$\tilde f$ only on the curve), and conflating them is an error worth
+flagging explicitly, since it is easy to make.
+
+First derivatives.  By construction (the stationarity condition),
+\[
+  \nabla_\theta\mathcal{L}(\theta^*,\lambda^*)
+  = \nabla f(\theta^*) - \lambda^*\nabla g(\theta^*) = 0.
+\]
+This says $\nabla f(\theta^*) = \lambda^*\nabla g(\theta^*)$ ---
+\emph{not} that $\nabla f(\theta^*)=0$.  In general $f$ itself has a
+nonzero gradient at $\theta^*$ (it is only the projection along the
+constraint direction that vanishes).  So the unconstrained $f$ can
+have any slope at $\theta^*$; nothing here forces $f$ to be flat
+there.
+
+What about $\tilde f\,'$, the intrinsic derivative of $f$ restricted
+to the curve $\{g=0\}$?  By definition of constrained stationarity
+(Question~2), $\theta^*$ is a stationary point of $\tilde f$ exactly
+when $\nabla f(\theta^*)\parallel\nabla g(\theta^*)$ --- which is
+precisely the condition we just derived from $\nabla_\theta
+\mathcal{L}=0$.  So $\tilde f\,'(\tilde\theta^*)=0$ always, at any
+stationary point of the Lagrangian: this is one honest fact we can
+state about $\tilde f$ near $\theta^*$, in contrast to $f$ itself
+(which need not be flat there).
+
+Second derivatives are where the behaviours can genuinely differ.
+$\tilde f$ lives on a curve, so $\tilde f\,''(\tilde\theta^*)$ is a
+single number determining whether $\tilde\theta^*$ is a constrained
+local max, min, or inflection of $\tilde f$ --- and this number
+depends on the curvature of \emph{both} $f$ and $g$ along the curve
+(the bordered Hessian), not on $f''$ alone.  Meanwhile
+$\mathcal{L}(\cdot,\lambda^*)$, as a function on the full
+2-dimensional $\theta$-space, has its own Hessian
+$\nabla^2 f(\theta^*) - \lambda^*\nabla^2 g(\theta^*)$, a $2\times 2$
+matrix --- a strictly richer object than the scalar
+$\tilde f\,''(\tilde\theta^*)$.  The relation between them is exactly
+the content of the bordered-Hessian test: $\tilde\theta^*$ is a
+constrained local max of $\tilde f$ iff the bordered Hessian
+\[
+  \bar H = \begin{pmatrix} 0 & \nabla g(\theta^*)^\top \\
+  \nabla g(\theta^*) & \nabla^2 f(\theta^*)-\lambda^*\nabla^2 g(\theta^*)
+  \end{pmatrix}
+\]
+has the appropriate sign pattern on the subspace orthogonal to
+$\nabla g(\theta^*)$ --- a strictly weaker requirement than
+$\nabla^2 f(\theta^*)-\lambda^*\nabla^2g(\theta^*)$ being negative
+definite on the whole space.  So: the second-order behaviour of
+$\tilde f$ cannot in general be read off from $f''$ alone (our
+earlier scalar-case shortcut, valid only because there the curve
+degenerated to a point and the question of an interior second
+derivative did not arise); in the genuine multivariate case it
+requires this restricted (bordered) computation.
+
+\emph{Why $\mathcal{L}$ is always a genuine saddle in $(\theta,\lambda)$.}
+This part of the original answer survives unchanged, since it
+concerned the full Lagrangian $\mathcal{L}(\theta,\lambda)$ jointly
+in $(\theta,\lambda)$, not the restricted $\tilde f$.  In the
+one-constraint, scalar-multiplier case, the mixed Hessian block is
+$-\nabla g(\theta^*)\ne 0$ (constraint qualification), forcing one
+positive and one negative eigenvalue overall: $\mathcal{L}$ is a
+saddle in the joint $(\theta,\lambda)$ sense regardless of what
+$\tilde f\,''$ turns out to be.
+
+\paragraph{Question 2: stationarity on the constrained manifold.}
+The unconstrained stationary points of $f$ are irrelevant to the
+constrained problem --- but the constrained problem is itself a
+function restricted to a lower-dimensional set (a curve, in the
+two-variable case), and on that set one can still speak of
+\emph{local optima} directly.  Can one also speak of stationarity
+intrinsically, without invoking the full-dimensional derivative
+that requires a full neighbourhood?
+
+The answer is yes, and it is not a vague analogy: when $g$ is
+smooth and $\nabla g\ne 0$ at the point in question (the constraint
+qualification), the implicit function theorem guarantees that
+$\{g=0\}$ is locally a smooth curve (a 1-dimensional manifold,
+in the two-variable case), parametrisable by a single coordinate.
+Restricting $f$ to this curve gives an honest one-variable function
+$\tilde f$ of that coordinate, with an honest derivative
+$\tilde f\,'$ --- not merely something ``directional-derivative-like.''
+The stationary points of $\tilde f$ (where $\tilde f\,'=0$) are
+precisely the local optima of $f$ on the constraint curve.
+
+The classical Lagrange theorem is exactly the statement that these
+intrinsic stationary points of $\tilde f$ coincide with the
+projections of the stationary points of $\mathcal{L}$:
+\[
+  \tilde f\,'(\theta^*) = 0
+  \iff
+  \nabla f(\theta^*) \parallel \nabla g(\theta^*)
+  \iff
+  \exists\,\lambda^*:\ \nabla_{\theta,\lambda}\mathcal{L}(\theta^*,\lambda^*)=0.
+\]
+This is a genuine \emph{if and only if}, not merely an inclusion of
+one set of points by the other.  So the ``stronger statement''
+anticipated in the question is, in fact, already the standard
+Lagrange theorem --- once the intrinsic derivative on the
+constraint curve is defined via the implicit function theorem,
+there is no missing or ill-defined notion left over: the apparent
+gap (``I don't have a good definition'') is closed by the
+constraint qualification, which is precisely the hypothesis that
+makes $\{g=0\}$ a smooth curve with a well-defined tangent direction
+at every point.
+
+%--------------------------------------------------------------------
+
+\end{document}

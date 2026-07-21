@@ -1,0 +1,681 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\mbF}{\mathcal{F}}
+\newcommand*{\ve}{\varepsilon}
+
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~1~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries Conditional Expectation and the Regression Function}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+
+%--------------------------------------------------------------------
+\section{Homoscedasticity in Elementary Regression Textbooks}
+\label{sec:elementary_textbooks}
+%--------------------------------------------------------------------
+
+Three settings are usually conflated in introductory regression
+courses: $Y_i$'s with fixed indices, the linear model with non-random
+$X$, and the joint-distribution setup with random $X$.  All three
+talk about ``homoscedasticity'', but they mean different things, and
+the slippage between them is a frequent source of confusion.  This
+chapter separates them cleanly before moving on to the measure-theoretic
+formulation used in the rest of the text.
+
+%--------------------------------------------------------------------
+\subsection{Non-random $X$: homoscedasticity as equal variances}
+\label{sec:nonrandom}
+%--------------------------------------------------------------------
+
+In introductory regression courses, the regressor $X$ is treated as
+non-random: it is a fixed set of index values $x_1, \ldots, x_n \in \mR$.
+For each index $x_i$ there is a target random variable $Y_i$, all defined
+on the same probability space. We can write this as
+\[
+  Y_{x_1},\ Y_{x_2},\ \ldots,\ Y_{x_n},
+\]
+and if we drop the strange subscripts, we simply have a random vector
+$(Y_1, \ldots, Y_n)$---$n$ random variables on a common space.
+
+\begin{definition}
+In the non-random-$X$ setting, the variables $Y_1, \ldots, Y_n$ are
+called \textbf{homoscedastic} if
+\[
+  \Var(Y_1) = \Var(Y_2) = \cdots = \Var(Y_n).
+\]
+\end{definition}
+
+This is a definition by flat: equal marginal variances. It does not yet
+involve a model or errors.
+
+\begin{remark}
+This can be taken as the definition, but the Probabilist's view is that it is better
+understood as a \emph{consequence} of a more primitive assumption about
+the errors, as shown in Section~\ref{sec:linearnonrandom}.
+\end{remark}
+
+%--------------------------------------------------------------------
+\subsection{The linear model with non-random $X$}
+\label{sec:linearnonrandom}
+%--------------------------------------------------------------------
+
+The standard linear model is
+\[
+  Y_i = \beta_0 + \beta_1 x_i + \ve_i, \qquad i = 1,\ldots,n,
+\]
+where $x_1,\ldots,x_n$ are fixed numbers and $\ve_1,\ldots,\ve_n$ are
+random errors. Here the $x_i$ are not random---they are parameters of
+the model, not outcomes of a random variable.
+
+\textbf{Homoscedasticity in this model} means
+\[
+  \Var(\ve_1) = \Var(\ve_2) = \cdots = \Var(\ve_n) = \sigma^2.
+\]
+This implies $\Var(Y_i) = \sigma^2$ for all $i$, since $\beta_0 + \beta_1 x_i$
+is a constant.
+
+\textbf{Independence structure.}
+If $\ve_1,\ldots,\ve_n$ are independent, then $Y_1,\ldots,Y_n$ are also
+independent. However, i.i.d.\ errors do \emph{not} imply i.i.d.\ responses:
+\[
+  \E Y_i = \beta_0 + \beta_1 x_i,
+\]
+so the $Y_i$ have different means whenever the $x_i$ differ. Independent
+with unequal distributions is not i.i.d.
+
+\begin{remark}
+This contrast matters: in the non-random-$X$ setting, ``identically
+distributed'' is simply not the right concept for the $Y_i$. The
+meaningful homogeneity condition is constancy of \emph{variance}, not
+of distribution.
+\end{remark}
+
+%--------------------------------------------------------------------
+\subsection{Random $X$: the joint distribution model}
+\label{sec:randomX}
+%--------------------------------------------------------------------
+
+Now suppose $(X, Y)$ is a random vector defined on a probability space
+$(\Omega, \mbF, \mP)$. We observe an i.i.d.\ sample of pairs:
+\[
+  (X_1, Y_1),\ (X_2, Y_2),\ \ldots,\ (X_n, Y_n),
+\]
+where each pair $(X_i, Y_i)$ has the same joint distribution as $(X, Y)$,
+and the pairs are mutually independent (in the full sense: the generated
+$\sigma$-algebras $\sigma(X_i, Y_i)$ are independent).
+
+\textbf{The i.i.d.\ paradox.}
+In this model, $(X_1, Y_1) \overset{d}{=} (X_2, Y_2) \overset{d}{=} \cdots$,
+and in particular $Y_1 \overset{d}{=} Y_2$. Yet in the non-random-$X$ model,
+$Y_1$ and $Y_2$ have different distributions (different means). What is
+going on?
+
+The resolution is that these are genuinely different models. In the
+random-$X$ model, each $(X_i, Y_i)$ is an independent draw from the
+\emph{same} joint distribution; the $X_i$ vary randomly, and the
+marginal distribution of $Y_i$ is the same for all $i$ by symmetry.
+In the non-random-$X$ model, the $x_i$ are fixed constants; conditioning
+on specific values $x_1 \neq x_2$ selects slices of the joint distribution
+with different conditional means.
+
+\begin{example}
+Consider a single random variable $X$ with sample $(X_1, X_2)$
+i.i.d.$\sim X$. Before observing, $X_1 \overset{d}{=} X_2$. Once we
+observe the outcomes $(x_1, x_2)$, we might think of $X_1$ and $X_2$
+as degenerate: $X_1 \sim \delta_{x_1}$, $X_2 \sim \delta_{x_2}$. If
+$x_1 \neq x_2$ these are different distributions---no longer i.i.d.
+The non-random-$X$ regression model is precisely this: we condition on
+the observed $x_i$, and the i.i.d.\ structure of the pairs collapses.
+\end{example}
+
+This is not a paradox but a model choice. Fixing $X$ (conditioning)
+and treating $X$ as random are different setups, with different
+implications for what ``i.i.d.'' means.
+
+\section{Conditional Expectation: Definition and Properties}
+\label{sec:condexp}
+%--------------------------------------------------------------------
+
+\subsection{Definition}
+
+Let $(X,Y)$ be a random vector on $(\Omega, \mbF, \mP)$ with $\E|Y| < \infty$.
+A random variable $Z = Z(\omega)$ is called $\E[Y \mid X]$, the
+\textbf{conditional expectation of $Y$ given $X$}, if:
+\begin{enumerate}[label=(\arabic*)]
+  \item $Z$ is $\sigma(X)$-measurable, and
+  \item $\int_A Z\,d\mP = \int_A Y\,d\mP$ for all $A \in \sigma(X)$.
+\end{enumerate}
+
+\begin{remark}[Operator view]
+The conditional expectation is a binary operator taking two random
+variables $X$ and $Y$ as arguments and returning a new random variable
+$Z = \E[Y \mid X]$. More precisely:
+\[
+  \E[\,\cdot \mid \cdot\,]: (X, Y) \;\longmapsto\; Z,
+\]
+where the output $Z$ is itself a random variable on $(\Omega, \mbF, \mP)$,
+with values in $\mR$. The same operator, applied to the same pair
+$(X,Y)$ but with a squared-residual argument, gives the conditional
+variance (the Conditional Variance section (Part~6)).
+
+When we pass to the Doob--Dynkin representation $Z = h(X)$, we are
+factoring this operator through the values of $X$: the function
+$h:\mR\to\mR$ encodes the same information as $Z$, but as a function
+of the \emph{realised value} of $X$ rather than of $\omega$ directly.
+\end{remark}
+
+\subsection{Existence, uniqueness, and distribution}
+
+\begin{proposition}[Existence]
+Under $\E|Y| < \infty$, a random variable $Z$ satisfying (1)--(2) always
+exists.
+\end{proposition}
+
+\begin{proof}[Sketch]
+This is a consequence of the Radon--Nikodym theorem. Define a signed
+measure $\nu(A) = \int_A Y\,d\mP$ on $\sigma(X)$. Since $Y$ is
+integrable, $\nu$ is absolutely continuous with respect to $\mP|_{\sigma(X)}$.
+By Radon--Nikodym, there exists a $\sigma(X)$-measurable density $Z$
+such that $\nu(A) = \int_A Z\,d\mP$ for all $A \in \sigma(X)$. This $Z$
+satisfies (1) and (2).
+Reference: Rudin, \textit{Real and Complex Analysis}, Theorem~6.10;
+Kallenberg, \textit{Foundations of Modern Probability}, Theorem~5.1.
+\end{proof}
+
+\begin{proposition}[Uniqueness up to null sets]
+If $Z_1$ and $Z_2$ both satisfy (1)--(2), then $Z_1 = Z_2$ almost surely.
+\end{proposition}
+
+\begin{proof}
+Both satisfy condition (2), so $\int_A Z_1\,d\mP = \int_A Z_2\,d\mP$
+for all $A \in \sigma(X)$, hence $\int_A (Z_1 - Z_2)\,d\mP = 0$.
+Set $A = \{Z_1 > Z_2\} \in \sigma(X)$. On $A$ the integrand $Z_1 - Z_2 > 0$,
+so $\mP(A) = 0$. Similarly $\mP(Z_1 < Z_2) = 0$.
+Hence $\mP(Z_1 \neq Z_2) = 0$.
+\end{proof}
+
+\begin{remark}[Distribution]
+Since any two versions of $\E[Y \mid X]$ agree almost surely, they
+induce the same pushforward measure on $\mR$. That is, all versions
+have the same distribution. This follows immediately from uniqueness:
+if $Z_1 = Z_2$ a.s., then $\mP(Z_1 \in B) = \mP(Z_2 \in B)$ for
+every Borel set $B$.
+\end{remark}
+
+\subsection{The equivalence theorem}
+
+The following theorem gives an alternative characterisation of the
+conditional expectation that follows directly from the definition,
+without any use of the Doob--Dynkin factorisation.
+
+\begin{proposition}[Equivalence theorem]
+Let $Z$ be $\sigma(X)$-measurable with $\E|Z| < \infty$, and set
+$u = Y - Z$. Then:
+\[
+  Z = \E[Y \mid X] \quad \Longleftrightarrow \quad \E[u \mid X] = 0.
+\]
+\end{proposition}
+
+\begin{proof}
+($\Rightarrow$) Assume $Z = \E[Y \mid X]$. Then:
+\[
+\E[u \mid X] = \E[Y - Z \mid X] = \E[Y \mid X] - \E[Z \mid X] = Z - Z = 0,
+\]
+where the last equality uses that $Z$ is $\sigma(X)$-measurable, so
+$\E[Z \mid X] = Z$.
+
+($\Leftarrow$) Assume $\E[u \mid X] = 0$. Rearrange: $Z = Y - u$.
+Taking conditional expectations:
+\[
+\E[Z \mid X] = \E[Y - u \mid X] = \E[Y \mid X] - \E[u \mid X] = \E[Y \mid X].
+\]
+Since $Z$ is $\sigma(X)$-measurable, $\E[Z \mid X] = Z$, giving
+$Z = \E[Y \mid X]$.
+\end{proof}
+
+\textbf{Decomposition.}
+Taking $Z = \E[Y \mid X]$ and $u = Y - Z$, we have $Y = Z + u$ with
+$\E[u \mid X] = 0$. This holds with no further assumptions beyond
+$\E|Y| < \infty$.
+
+\subsection{Doob--Dynkin factorisation and the regression function}
+
+The equivalence theorem above characterises $\E[Y \mid X]$ purely
+through the definition. The Doob--Dynkin lemma adds further structure:
+since $Z = \E[Y \mid X]$ is $\sigma(X)$-measurable, there exists a
+Borel-measurable function $h: \mR \to \mR$ such that
+\[
+  Z(\omega) = h(X(\omega)) \quad \text{for all } \omega \in \Omega.
+\]
+The function $h$ is the \textbf{regression function} of $Y$ on $X$:
+$h(x) = \E[Y \mid X = x]$ for (almost) every $x$.
+The decomposition now reads $Y = h(X) + u$.
+
+\textbf{Degrees of freedom: $Z$ vs.\ $h$.}
+
+\textit{Freedom of $Z$.}
+By the uniqueness result (Section~4.2), any two versions $Z_1, Z_2$ of
+$\E[Y \mid X]$ agree $\mP$-almost surely. The freedom of $Z$ is
+exactly: modification on $\mP$-null subsets of $\Omega$.
+
+\textit{Freedom of $h$.}
+Any two Borel functions $h_1, h_2$ satisfying $h_1(X) = Z$ a.s.\ and
+$h_2(X) = Z$ a.s.\ must satisfy $h_1(X) = h_2(X)$ $\mP$-a.s., which
+means
+\[
+  \mP\bigl(h_1(X) \neq h_2(X)\bigr) = 0,
+  \quad\text{i.e.}\quad
+  P_X\bigl(\{x : h_1(x) \neq h_2(x)\}\bigr) = 0.
+\]
+So $h$ is unique $P_X$-almost everywhere on $\mR$: two versions may
+differ only on a $P_X$-null Borel set. The freedom of $h$ is:
+modification on $P_X$-null subsets of $\mR$.
+
+\textit{Comparing the two freedoms.}
+The relationship between the two measures is $P_X(B) = \mP(X \in B)$
+for every Borel $B \subseteq \mR$. Therefore:
+\begin{itemize}
+  \item A $\mP$-null set $N \subseteq \Omega$ corresponds, via $X$,
+        to modifying $h$ on $X(N) \subseteq \mR$, which is a
+        $P_X$-null set. So every freedom of $Z$ translates into a
+        freedom of $h$.
+  \item Conversely, any Borel set $B \subseteq \mR$ with $P_X(B) = 0$
+        gives a freedom of $h$ (modify $h$ on $B$ arbitrarily), and
+        the corresponding set $\{X \in B\}$ has $\mP$-measure zero,
+        so this change is invisible to $Z$ as well.
+  \item However, $h$ also has freedom on Borel sets $B$ with
+        $P_X(B) = 0$ that are \emph{not} in the image of any $\omega$
+        under $X$---for instance, any open interval on which $P_X$
+        assigns zero mass. For such $B$, modifying $h$ on $B$ cannot
+        even be described in terms of $Z$: the event $\{X \in B\}$ has
+        $\mP$-measure zero, so the modification has no counterpart on
+        $\Omega$ at all.
+\end{itemize}
+
+This last point is the precise sense in which $h$ has \emph{strictly
+more} freedom than $Z$. The extra freedom consists of modifications
+on those $P_X$-null Borel sets in $\mR$ for which $\mP(X \in B) = 0$,
+including sets that $X$ may reach on a $\mP$-null set of $\omega$'s.
+
+\begin{remark}[Support and its complications]
+One is tempted to describe the extra freedom of $h$ as ``freedom
+outside the support of $P_X$.'' The support of $P_X$ on $\mR$ is
+standardly defined as the smallest closed set of full $P_X$-measure,
+or equivalently $\mR \setminus \bigcup\{U \text{ open} : P_X(U)=0\}$.
+This is well-defined on $\mR$ with the usual topology, because an
+arbitrary union of open $P_X$-null sets is again open and has
+$P_X$-measure zero.
+
+However, using the support to delineate freedom is imprecise in two
+ways. First, the support can contain $P_X$-null subsets (individual
+points under a continuous distribution), and $h$ is free on those too.
+Second, range and support are different: $X(\Omega)$ and
+$\mathrm{supp}(P_X)$ need not coincide---$X$ could take values outside
+the support on a $\mP$-null set of $\omega$'s, or conversely the
+support could contain points that $X$ never reaches. The cleanest
+statement is: $h$ is determined $P_X$-almost everywhere on $\mR$, and
+any Borel set of $P_X$-measure zero is a set of freedom for $h$.
+\end{remark}
+
+\textbf{The linear regression assumption.}
+The standard linear model imposes $h(x) = \beta_0 + \beta_1 x$ on all
+of $\mR$. This fixes $h$ on $P_X$-null sets where it is otherwise
+undetermined---an extrapolation assumption that the data cannot test.
+
+%--------------------------------------------------------------------
+\section{Measure-Dependent Quantities}
+\label{sec:measure_dependent}
+%--------------------------------------------------------------------
+
+This chapter collects the conceptual foundations that underlie the
+likelihood-based tests discussed later: the notion of a
+measure-dependent function, the distinction between a statistic and
+a random quantity, the push-forward construction, and a concrete
+illustration of iterating measure-dependent maps.
+
+
+This section develops the conceptual framework needed to make the
+prediction story from the Consequences section (Part~6) precise. It
+clarifies the distinction between a statistic, a random quantity, and
+a measure-dependent function --- a distinction that is usually left
+implicit in textbooks.
+
+\subsection{The problem with $\E[Y_2 \mid Y_1]$ as a predictor}
+
+From the i.i.d.\ forecast notes: given a single observation $Y_1$,
+the MSE-optimal predictor of $Y_2 \overset{d}{=} Y_1$ is
+$f^*(Y_1) = \E[Y_2 \mid Y_1]$. But wait --- can we actually use this
+as a predictor?
+
+The conditional expectation $\E[Y_2 \mid Y_1]$ depends on the joint
+distribution $P$ of $(Y_1, Y_2)$. It is not the same function for all
+measures. A predictor that requires knowing $P$ to evaluate is not
+useful in practice, and is not a statistic in any standard sense.
+
+\subsection{Random quantities and statistics}
+
+\begin{definition}
+Let $\{P_\theta : \theta \in \Theta\}$ be a parametric family of
+distributions on $\mR^n$. A \textbf{random quantity} is a measurable
+function
+\[
+  f: \mR^n \times \Theta \to \mR,
+  \quad (x_1,\ldots,x_n,\theta) \mapsto f(x_1,\ldots,x_n,\theta).
+\]
+A random quantity $f$ is called a \textbf{statistic} (with respect to
+this family) if it does not depend on $\theta$:
+\[
+  f(x_1,\ldots,x_n,\theta) = f(x_1,\ldots,x_n,\theta')
+  \quad \text{for all } \theta,\theta' \in \Theta.
+\]
+\end{definition}
+
+\begin{remark}[Two views on statistics]
+The Probabilist prefers the textbook convention: a statistic is simply a
+measurable function of the data, with no $\theta$ argument at all.
+The definition above is equivalent when the family is large enough ---
+if the family contains all possible distributions, then any function
+that happens to not depend on $\theta$ trivially satisfies the
+definition. The explicit $\theta$ argument is useful when we want to
+\emph{distinguish} statistics from non-statistics within a specific
+model family.
+\end{remark}
+
+\begin{remark}[Monotonicity with respect to the family]
+The statistic property is monotone with respect to inclusion of
+measure families.
+\begin{itemize}
+  \item \textbf{Downward monotonicity.} If $f$ is a statistic with
+        respect to a family $\mathcal{P}$, then it is also a statistic
+        with respect to every subfamily $\mathcal{Q} \subseteq
+        \mathcal{P}$. A smaller family imposes fewer constraints on
+        measure-independence, so any function that does not depend on
+        the measure within $\mathcal{P}$ certainly does not depend on
+        it within $\mathcal{Q}$.
+  \item \textbf{Upward monotonicity.} If $f$ is \emph{not} a statistic
+        with respect to $\mathcal{P}$ (i.e.\ it takes different values
+        for some $P, P' \in \mathcal{P}$), then it is also not a
+        statistic with respect to any larger family $\mathcal{Q}
+        \supseteq \mathcal{P}$, since $\mathcal{Q}$ still contains
+        the distinguishing pair $P, P'$.
+\end{itemize}
+In particular: if $f$ \emph{is} a statistic with respect to the full
+family of all probability measures, it is a statistic with respect to
+every subfamily (downward monotonicity applied to the largest possible
+family). Conversely, if $f$ is \emph{not} a statistic with respect to
+some family $\mathcal{P}$, it fails to be a statistic with respect to
+every superfamily $\mathcal{Q}\supseteq\mathcal{P}$. Being a statistic
+with respect to a singleton family $\{P\}$ is vacuous and tells us
+nothing about larger families.
+\end{remark}
+
+\textbf{Examples.}
+\begin{itemize}
+  \item $f(Y_1) = Y_1$: a statistic. It does not depend on $P$.
+  \item $f_P(Y_1) = \E_P[Y_2 \mid Y_1]$: not a statistic. It depends
+        on the joint distribution $P$ of $(Y_1,Y_2)$ and is different
+        for different $P$.
+  \item $h_P(X) = \E_P[Y \mid X]$ (regression function): not a
+        statistic. It depends on the joint distribution of $(X,Y)$.
+        To be precise, we should write $h_P$ or $h_{P_{XY}}$.
+  \item $\hat\sigma^2 = \frac{1}{n-2}\sum\hat u_i^2$: a statistic.
+        Computable from data alone.
+\end{itemize}
+
+\subsection{Mixed random quantities and approximation}
+
+Some objects depend on both the sample and the parameter --- they are
+neither pure statistics nor pure parameters. Examples:
+\begin{itemize}
+  \item $\E_P[Y_2 \mid Y_1]$: depends on $Y_1$ (data) and on $P$
+        (measure).
+  \item $\Var(\hat\beta_1 \mid \mathbf{X}) = \sigma^2/S_{XX}$: depends
+        on $\mathbf{X}$ (data) and on $\sigma^2$ (parameter).
+  \item $h_P(X_i) = \E_P[Y_i \mid X_i]$: depends on $X_i$ (data) and
+        on $P$ (measure).
+\end{itemize}
+
+\textbf{How do we approximate mixed quantities, and by what?}
+In principle, any random quantity --- statistic or not --- can serve
+as an approximation. But in practice, only statistics are usable: a
+non-statistic requires knowing the measure to evaluate, which defeats
+the purpose. The plug-in principle is the standard way to convert a
+non-statistic into a statistic: replace the unknown measure-dependent
+object by an estimate.
+
+\textbf{On the best estimator of $\E_P Y$.}
+Suppose we want to estimate the parameter $\theta_P = \E_P Y$ by a
+function $g$ of data $X_1,\ldots,X_n$. If we require $g$ to be a
+true statistic (measure-independent), then the MSE depends on $P$
+and we must specify for which $P$ we optimise.
+
+If instead we allow $g$ to depend on $P$, the optimum is trivial:
+set $g_P \equiv \theta_P$ (a constant equal to the parameter). This
+is formally a valid ``estimator'' --- a constant is a function of the
+sample --- but it is measure-dependent and thus not a statistic.
+It uses the parameter to estimate itself, which is circular.
+
+This shows why requiring measure-independence (the statistic property)
+is not merely a convention: it prevents the degenerate solution of
+``estimating $\theta_P$ by $\theta_P$.''
+
+\begin{remark}[Singleton family]
+If the family of measures is a singleton $\{P\}$, then every random
+quantity is trivially a statistic. In this case, any random quantity is a
+statistic. Is that right? Yes --- and this also means the constant
+$\theta_P$ is a valid statistic in that case. The degenerate solution
+is only excluded when the family is non-trivial.
+\end{remark}
+
+\begin{remark}[Degenerate case]
+If the family of measures is a singleton $\{P\}$, then every random
+quantity is trivially a statistic: there is no $\theta$ to depend on.
+This is consistent with the definition but loses the distinction between
+parameters, statistics, and measure-dependent quantities.
+\end{remark}
+
+\subsection{MSE decomposition: the general case}
+
+Let $P$ be a joint distribution of $(Y_1, Y_2)$ with $\E_P[Y_2^2]<\infty$.
+For any random quantity $f$ (possibly measure-dependent), the prediction
+MSE decomposes as follows.
+
+Add and subtract the measure-specific optimal predictor
+$f_P^*(Y_1) = \E_P[Y_2 \mid Y_1]$:
+\begin{align*}
+\E_P[(f(Y_1)-Y_2)^2]
+&= \E_P\bigl[(f(Y_1)-f_P^*(Y_1)) + (f_P^*(Y_1)-Y_2)\bigr]^2 \\
+&= \E_P[(f(Y_1)-f_P^*(Y_1))^2]
+  + 2\,\E_P[(f(Y_1)-f_P^*(Y_1))(f_P^*(Y_1)-Y_2)] \\
+&\quad + \E_P[(f_P^*(Y_1)-Y_2)^2].
+\end{align*}
+
+\textbf{The cross-term vanishes.}
+\begin{align*}
+&\E_P\bigl[(f(Y_1)-f_P^*(Y_1))\cdot(f_P^*(Y_1)-Y_2)\bigr] \\
+&= \E_P\bigl[\E_P[(f(Y_1)-f_P^*(Y_1))\cdot(f_P^*(Y_1)-Y_2)\mid Y_1]\bigr] \\
+&= \E_P\bigl[(f(Y_1)-f_P^*(Y_1))\cdot\E_P[f_P^*(Y_1)-Y_2 \mid Y_1]\bigr] \\
+&= \E_P\bigl[(f(Y_1)-f_P^*(Y_1))\cdot 0\bigr] = 0,
+\end{align*}
+where we used $\E_P[f_P^*(Y_1)-Y_2 \mid Y_1]
+= f_P^*(Y_1) - \E_P[Y_2\mid Y_1] = 0$.
+
+\textbf{Conclusion.}
+\begin{equation}
+\label{eq:mse_decomp}
+\E_P[(f(Y_1)-Y_2)^2]
+= \underbrace{\E_P[(f(Y_1)-f_P^*(Y_1))^2]}_{\geq\,0}
++ \underbrace{\E_P[(f_P^*(Y_1)-Y_2)^2]}_{\text{irreducible floor}}.
+\end{equation}
+Denoting the measure-specific minimizer $f_P^*(Y_1) = \E_P[Y_2 \mid Y_1]$:
+\[
+  \min_f \E_P[(f(Y_1)-Y_2)^2] = \E_P[(f_P^*(Y_1)-Y_2)^2],
+\]
+and $f_P^*$ is a minimizer. But this minimizer depends on $P$ ---
+different measures give different optimal predictors.
+
+\subsection{The maxi-min problem}
+
+Since the optimal predictor $f_P^*$ changes with $P$, a natural
+question is: can we find a single statistic $f$ (measure-independent)
+that performs well uniformly across all measures?
+
+One way to formalise this is the \textbf{maxi-min criterion}: find the
+measure $P$ that is hardest to predict, and evaluate the best
+measure-specific predictor there:
+\[
+  \max_{P_{Y_1,Y_2}} \min_{f_P} \E_P\bigl[(f_P(Y_1) - Y_2)^2\bigr].
+\]
+This is the worst-case irreducible floor over all joint distributions.
+It does not directly give a statistic, because both the $\max$ and the
+$\min$ are taken over measure-dependent objects.
+
+\begin{remark}
+This criterion does not appear in standard textbooks on prediction or
+regression. The usual approach is to fix a family of measures (e.g.\
+i.i.d., or parametric time-series) and work within that family.
+The maxi-min formulation is a minimax decision-theoretic perspective
+that treats the choice of measure as an adversary's move.
+\end{remark}
+
+A more tractable variant restricts to a subfamily
+$\mathcal{P} \subseteq \{P_{Y_1,Y_2}\}$:
+\[
+  \max_{P \in \mathcal{P}} \min_{f_P} \E_P\bigl[(f_P(Y_1) - Y_2)^2\bigr].
+\]
+Natural subfamilies (in increasing order of restriction):
+\begin{itemize}
+  \item All joint distributions of $(Y_1,Y_2)$.
+  \item Product measures: $Y_1$ and $Y_2$ independent.
+  \item I.i.d.\ subfamily: $P = P_Y \otimes P_Y$.
+  \item Parametric time-series models (e.g.\ AR(1)).
+\end{itemize}
+On the i.i.d.\ subfamily the irreducible floor is $\Var Y$, achieved
+by $f_P^*(Y_1) = \E Y$ --- but this minimum depends on $P$ through
+$\E Y$, so the maxi-min over i.i.d.\ measures is
+$\sup_{P_Y} \Var_{P_Y} Y$, which is unbounded without moment
+constraints.
+
+
+
+Restrict to the i.i.d.\ subfamily: $P = P_Y \otimes P_Y$, so
+$Y_1$ and $Y_2$ are independent with the same marginal distribution.
+Under i.i.d., $\E_P[Y_2 \mid Y_1] = \E_P Y_2 = \E Y$ (a constant).
+
+\textbf{Predictor 1: $f(Y_1) = Y_1$ (identity, a statistic).}
+\begin{align*}
+\E[(Y_1-Y_2)^2]
+&= \E[Y_1^2 - 2Y_1 Y_2 + Y_2^2] \\
+&= \E Y_1^2 - 2(\E Y)^2 + \E Y_2^2
+  \quad\text{(independence)}\\
+&= 2\E Y^2 - 2(\E Y)^2 = 2\Var Y.
+\end{align*}
+The identity function is a statistic: it does not depend on the
+measure. MSE $= 2\Var Y$.
+
+\textbf{Predictor 2: $f_P(Y_1) = \E_P[Y_2\mid Y_1] = \E Y$
+(measure-dependent constant).}
+\begin{align*}
+\E[(\E Y - Y_2)^2] = \Var Y.
+\end{align*}
+This is the measure-specific optimal predictor. MSE $= \Var Y$,
+exactly half of the identity predictor's MSE.
+
+\textbf{What this illustrates.}
+The optimal predictor $f_P^*$ is twice as good as the statistic $Y_1$
+on the i.i.d.\ subfamily. But $f_P^*$ requires knowing $\E Y$, which
+depends on $P$. In practice, $\E Y$ is unknown and must be estimated.
+The plug-in predictor --- replace $\E Y$ by $\bar Y$ or $Y_1$ ---
+recovers the statistic and pays the price: MSE doubles.
+
+\begin{remark}
+The conditional expectation $\E[Y_2 \mid Y_1]$ does not characterise
+the full joint distribution of $(Y_1,Y_2)$: it is one operator of the
+joint distribution, and many distributions share the same conditional
+expectation (recall: conditional expectation is a bivariate operator).
+For the purpose of optimal point prediction, knowing $\E[Y_2 \mid Y_1]$
+is sufficient --- we do not need the full measure.
+\end{remark}
+
+\subsection{Connection to regression}
+
+The same structure appears in regression. The conditional variance
+$\Var(\hat\beta_1 \mid \mathbf{X}) = \sigma^2/S_{XX}$ is a random
+variable (under homoscedasticity) with a single unknown ingredient:
+the parameter $\sigma^2$. The function $g = \sigma^2$ is known only
+up to the parameter --- it is the analogue of $\E Y$ in the prediction
+example.
+
+To predict $\Var(\hat\beta_1 \mid \mathbf{X})$, we estimate $\sigma^2$
+by $\hat\sigma^2$ (plug-in) and substitute. This introduces the same
+gap as replacing $\E Y$ by $Y_1$: the predictor is now a statistic,
+but it pays an additional plug-in cost beyond the irreducible floor.
+
+%--------------------------------------------------------------------
+
+
+\end{document}

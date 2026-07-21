@@ -1,0 +1,228 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\mbF}{\mathcal{F}}
+\newcommand*{\ve}{\varepsilon}
+
+
+
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~9~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries Sequential Sampling and the Bayesian Connection}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+\section{Sequential Sampling of Random Quantities}
+\label{sec:sequential_sampling}
+%--------------------------------------------------------------------
+
+\subsection{Motivation}
+
+We routinely manipulate measure-dependent functions: we sample them,
+integrate them, take moments, differentiate them, form derived
+quantities.  The density $f_P$ of a measure $P$ is one such object.
+A natural question: can we iterate this process --- plug a random
+draw back into the density, treat the result as a new random
+variable, and repeat?  This section explores three such
+constructions and their limiting behaviour.
+
+\subsection{Setup}
+
+Fix a probability measure $P$ on $\mathbb{R}$ with Lebesgue density
+$f = f_P \geq 0$, $\int f = 1$.  Draw $X_1 \sim P$.  Since
+$f(x) \geq 0$ and $\int f = 1$, the function $f$ maps $\mathbb{R}$
+into $[0, \sup f\,]$, so all iterates stay bounded above by
+$\sup f < \infty$ (assuming the density is bounded, as for the
+normal family).
+
+\subsection{Three sequences}
+
+\paragraph{Sequence $P_n$ (chained push-forward).}
+Define $X_{n+1} = f_{P_n}(X_n)$, where $P_n$ is the distribution
+of $X_n$ and $f_{P_n}$ is its density.  Each step is a
+\emph{push-forward}: $P_{n+1} = (f_{P_n})_* P_n$.  The density
+changes at every step together with the sampling distribution.
+
+\paragraph{Sequence $Q_n$ (orbit of a point under $f$).}
+Fix the original density $f = f_{P_1}$ throughout.  Set
+\[
+  X_{n+1} = f(X_n), \qquad X_1 \sim P.
+\]
+This is deterministic given $X_1$: the sequence $X_1, f(X_1),
+f(f(X_1)), \ldots$ is the \emph{orbit} of the initial point $X_1$
+under the iterated application of $f$.  The randomness enters only
+through the initial draw; thereafter $Q_n$ is the push-forward of
+$P$ under $f^{\circ n}$ (the $n$-fold composition of $f$ with itself).
+
+\paragraph{Sequence $R_n$ (fixed sample point, varying density).}
+Keep $X_1$ fixed and let the density vary.  Concretely, if $P_n$
+has density $f_n$, form
+\[
+  R_n = f_n(X_1).
+\]
+Here $X_1$ is a fixed (random) argument and $f_n$ evolves.  This
+is closer to evaluating a likelihood at a fixed data point under a
+changing model.
+
+\subsection{Limiting behaviour of sequence $Q_n$}
+
+The sequence $Q_n$ is the most concrete: it reduces to the dynamics
+of the map $f: \mathbb{R} \to [0,\sup f\,]$.
+
+\paragraph{Contraction.}
+After one step, every point is mapped into $[0,\sup f\,]$.  If $f$
+is a contraction on this interval --- i.e.\ $|f'(x)| < 1$ for all
+$x$ in the range --- then by the Banach fixed-point theorem the orbit
+converges to the unique fixed point $x^*$ satisfying
+\[
+  f(x^*) = x^*.
+\]
+
+\paragraph{Fixed point for the normal density.}
+For $f(x) = \frac{1}{\sqrt{2\pi}}e^{-x^2/2}$ the equation
+$f(x^*) = x^*$ has a solution near $x^* \approx 0.3989$.
+(At $x=0$: $f(0) = 1/\sqrt{2\pi} \approx 0.399 > 0$; at $x=1$:
+$f(1) \approx 0.242 < 1$; by the intermediate value theorem a
+crossing exists.)  Moreover $f'(x) = -x f(x)$, so
+$|f'(x^*)| = x^* \cdot f(x^*) = (x^*)^2 \approx 0.159 < 1$:
+the fixed point is attracting and the orbit converges to it for
+almost every starting point $X_1$.
+
+The limiting distribution of $Q_n$ therefore degenerates to a point
+mass at $x^*$: starting from any $X_1 \sim P$, the sequence
+$f(X_1), f(f(X_1)), \ldots$ converges almost surely to $x^*$.
+
+\begin{remark}[Degenerate limit]
+The limit measure is $\delta_{x^*}$, a Dirac mass.  It has no
+Lebesgue density.  So even if every $Q_n$ has a density, the limit
+can lose absolute continuity.
+\end{remark}
+
+\subsection{Limiting behaviour of sequence $P_n$}
+
+The chained push-forward is more complex because the density
+changes at each step.  Even in the normal case, $P_2$ is the
+distribution of $f(X_1)$ where $X_1 \sim \mathcal{N}(0,1)$: its
+density is obtained by the change-of-variables formula applied to
+the non-monotone map $f$.  Since $f$ is even (symmetric about 0)
+and has a unique maximum at 0, the map is two-to-one on
+$\mathbb{R}\setminus\{0\}$ and the density of $P_2$ has support
+in $(0, 1/\sqrt{2\pi}\,]$.
+
+For the general sequence $P_n$, the densities $f_{P_n}$ contract
+their support and, under mild conditions, the sequence converges
+to a degenerate measure --- the rate and limit depending on $P$.
+
+\subsection{Dependence on the original distribution $P$}
+
+All three sequences depend only on $P$.  Different choices of $P$
+produce qualitatively different behaviour:
+
+\begin{itemize}
+  \item \textbf{Light-tailed unimodal $P$} (e.g.\ normal): the
+    density is bounded, the fixed point $x^*$ exists and is
+    attracting, the $Q_n$ sequence converges to $\delta_{x^*}$.
+
+  \item \textbf{Heavy-tailed $P$} (e.g.\ Cauchy): the density is
+    still bounded ($\sup f = 1/\pi$), but the orbit dynamics depend
+    on the fixed-point equation for the Cauchy density.
+
+  \item \textbf{Multimodal $P$}: the density map $f$ may have
+    multiple fixed points or even cycles, leading to more complex
+    orbit structure (period-doubling, chaos).
+
+  \item \textbf{Unbounded density} (e.g.\ Beta$(1/2, 1/2)$,
+    which diverges at 0 and 1): $\sup f = \infty$ and the
+    contraction argument breaks down; the sequence may diverge.
+\end{itemize}
+
+\subsection{Connection to Bayesian iteration and Markov chains}
+
+The construction in sequence $P_n$ is reminiscent of Bayesian
+updating: starting from a prior, each observation shifts the
+measure.  But here the ``data'' is the density itself evaluated at
+the current draw --- a self-referential structure.
+
+More formally, $Q_n$ defines a (deterministic given $X_1$)
+dynamical system on $\mathbb{R}$.  The randomness in $X_1$ induces
+a distribution over orbits.  If $f$ has a unique attracting fixed
+point $x^*$, the empirical measure of the orbit concentrates on
+$\delta_{x^*}$ regardless of the starting distribution $P$
+(as long as $P$ assigns positive mass to the basin of attraction
+of $x^*$, which for the normal density is all of $\mathbb{R}$).
+
+\begin{remark}[Open questions]
+The limiting behaviour of $P_n$ (chained push-forward) for general
+$P$ is not fully characterised here.  The key quantities are:
+(a) whether $f_{P_n}$ has a fixed point; (b) the spectral radius
+of the linearisation $Df_{P_n}$ at that fixed point; (c) whether
+the push-forward operation preserves absolute continuity.
+These depend on the smoothness and tail behaviour of $P$.
+\end{remark}
+
+
+
+
+
+\end{document}

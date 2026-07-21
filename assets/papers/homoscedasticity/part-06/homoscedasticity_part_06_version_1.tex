@@ -1,0 +1,367 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{tikz-cd}
+\usepackage{pgfplots}
+\usepgfplotslibrary{fillbetween}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\mbF}{\mathcal{F}}
+\newcommand*{\ve}{\varepsilon}
+
+
+
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~6~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries Three Asymptotically Equivalent Tests:\\Wald, LR, and Score}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+\newpage
+\section{The Three Likelihood Tests: Wald, LR, and Score}
+\label{sec:three_tests}
+%--------------------------------------------------------------------
+
+\subsection{Drawing the log-likelihood: unimodal case}
+
+We begin by drawing the log-likelihood $\ell(\theta)$ as a function
+of the parameter $\theta$, with data $x$ held fixed.
+In most problems $\ell$ can be negative (always so for discrete
+distributions; not necessarily for Lebesgue densities), but the
+sign does not affect the geometry.  We take the unimodal case.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{figs/img1.png}
+\caption{The Probabilist's sketch (2~June~2026): unimodal log-likelihood
+  $\ell(\theta)$ as a function of $\theta$, data $x$ fixed.
+  The curve has a unique maximum --- the MLE.}
+\label{fig:img1}
+\end{figure}
+
+The data $x$ was drawn from a distribution with true parameter
+$\theta_0$.  We mark $\theta_0$ (``true'') and
+$\hat\theta_\mathrm{MLE}(x)$ on the same graph.
+For this particular sample, the MLE falls to the left of $\theta_0$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{figs/img2.png}
+\caption{The Probabilist's sketch (2~June~2026): log-likelihood with
+  $\theta_0$ (true, red) and $\hat\theta_\mathrm{MLE}(x_1)$
+  (green) marked.  The MLE is sample-dependent.}
+\label{fig:img2}
+\end{figure}
+
+\subsection{The MLE is a random variable: two samples}
+
+Collecting a second independent sample $x_2$ from the same
+distribution $P_{\theta_0}$ yields a different log-likelihood and
+a different MLE.  The two MLEs land on opposite sides of $\theta_0$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.70\textwidth]{figs/img3.png}
+\caption{The Probabilist's sketch (2~June~2026): two log-likelihoods
+  $\ell_{x_1}$ (blue) and $\ell_{x_2}$ (green) for two independent
+  samples from $P_{\theta_0}$.
+  $\hat\theta_\mathrm{MLE}(x_1)$ and $\hat\theta_\mathrm{MLE}(x_2)$
+  land on opposite sides of the true $\theta_0$ (red vertical).
+  The red dot marks $\ell_{\theta_0,x_1}(\theta_0)$, the
+  log-likelihood evaluated at the true parameter.
+  The MLE is a random variable; the CLT describes its distribution
+  around $\theta_0$.}
+\label{fig:img3}
+\end{figure}
+
+There are \textbf{three approaches} to measuring the distance
+between the true $\theta_0$ and the estimated $\theta$.
+The estimate does not have to be MLE in general --- but it is in
+the standard asymptotic theory.
+The following picture, from Engle (1984), shows the case
+where $\hat\theta$ is the MLE.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.60\textwidth]{figs/img4.png}
+\caption{From Engle (1984, Ch.~13, Fig.~3.1): log-likelihood $L(\theta)$
+  with $L(\hat\theta)$ at the peak and $L(\theta^0)$ at the null.
+  The two dashed horizontal lines mark the two likelihood values;
+  the two dashed vertical lines mark $\theta^0$ and $\hat\theta$.}
+\label{fig:img4}
+\end{figure}
+
+\subsection{Three distances: formulas and geometry}
+
+Figure~\ref{fig:img5} shows all three distances simultaneously on
+the small-$\ell$ log-likelihood graph, together with the
+key labels $\theta_0$, $\hat\theta$ (MLE), and $\theta_\mathrm{true}$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{figs/img5.png}
+\caption{The Probabilist's sketch (3~June~2026): the log-likelihood $\ell$
+  with $\theta_0$, $\hat\theta$, and $\theta_\mathrm{true}$ on the
+  horizontal axis.  The three test statistics correspond to:
+  \textbf{(1) Wald} --- horizontal distance $\hat\theta-\theta_0$
+  (green bracket on $\theta$-axis);
+  \textbf{(2) LR} --- vertical distance
+  $\ell(\hat\theta)-\ell(\theta_0)$ (red bracket on $\ell$-axis);
+  \textbf{(3) Score/LM} --- slope $\tan\alpha = \ell'(\theta_0)$
+  at $\theta_0$ (the two tangent lines through $(\theta_0,\ell(\theta_0))$).
+  Annotation ``CLT, LLN'' marks the convergence
+  $\hat\theta\xrightarrow{P}\theta_\mathrm{true}$.
+  In all three distances we would prefer $\theta_\mathrm{true}$
+  instead of $\hat\theta$, but we do not have it.
+  Under $H_0$: $\theta_\mathrm{true}=\theta_0$, and then all three
+  CLTs work.}
+\label{fig:img5}
+\end{figure}
+
+On the picture we can consider two of the three distances directly:
+\[
+  d_1 = \hat\theta - \theta_0 \quad\text{(horizontal, Wald)},
+  \qquad
+  d_2 = \ell(\hat\theta) - \ell(\theta_0) \quad\text{(vertical, LR)}.
+\]
+For the LR distance, note that the difference of small-$\ell$
+log-likelihoods equals the logarithm of the ratio of the
+capital-$L$ likelihoods:
+\[
+  \ell(\hat\theta) - \ell(\theta_0)
+  = \ln L(\hat\theta) - \ln L(\theta_0)
+  = \ln\frac{L(\hat\theta)}{L(\theta_0)},
+\]
+which explains the name \emph{likelihood ratio} test.
+The third distance is the distance of the \emph{score} from zero:
+$d_3 = s(\theta_0) = \ell'(\theta_0)$, the slope (``tan~$\alpha$'')
+of $\ell$ at $\theta_0$.
+
+\paragraph{Wald test.}
+Estimates $\theta$ \emph{without} the restriction ($H_1$ model) and
+measures how far $\hat\theta$ is from $\theta_0$ in parameter space,
+scaled by estimated precision:
+\[
+  \xi_W = (\hat\theta-\theta_0)^2\cdot\mathcal{I}_n(\theta_0)
+  \;\xrightarrow{d}\;\chi^2_1 \quad\text{under }H_0.
+\]
+\emph{Starts at the alternative.}  Requires fitting the unrestricted model.
+
+\paragraph{Likelihood Ratio test.}
+Compares both models by their log-likelihood values:
+\[
+  \xi_{LR} = 2\bigl[\ell(\hat\theta) - \ell(\theta_0)\bigr]
+  = 2\ln\frac{L(\hat\theta)}{L(\theta_0)}
+  \;\xrightarrow{d}\;\chi^2_1 \quad\text{under }H_0.
+\]
+\emph{Compares both hypotheses directly.}  Requires fitting both models.
+
+\paragraph{Score (LM) test.}
+Estimates $\theta$ \emph{only under $H_0$}; checks whether
+$\ell'(\theta_0)$ is near zero:
+\[
+  \xi_{LM} = \frac{[\ell'(\theta_0)]^2}{\mathcal{I}_n(\theta_0)}
+  = \frac{s^2(\theta_0)}{\mathcal{I}_n(\theta_0)}
+  \;\xrightarrow{d}\;\chi^2_1 \quad\text{under }H_0.
+\]
+\emph{Starts at the null.}  Does \emph{not} require computing
+$\hat\theta$ --- the only test of the three without the MLE.
+
+The third distance can be interpreted as an elasticity of $L$
+capital (it does not have as easy a graphical interpretation in the
+$L$ picture), but on the small-$\ell$ graph the slope at
+$\theta_0$ is visible directly.
+
+\begin{remark}[Why $\theta_\mathrm{true}$, not $\hat\theta$]
+In all three distances we would ideally use $\theta_\mathrm{true}$
+instead of $\hat\theta$.  But $\theta_\mathrm{true}$ is unknown.
+Under $H_0$ we identify $\theta_\mathrm{true}=\theta_0$, and under
+this identification the distributions of all three statistics
+depend only on known quantities.  This is what makes the CLTs work
+and all three converge to $\chi^2$.
+\end{remark}
+
+\paragraph{Multivariate generalisation.}
+With $r$ restrictions on $\theta\in\mathbb{R}^p$, all three
+statistics share the $\chi^2_r$ null distribution:
+\begin{align*}
+  \xi_W    &= T(\hat\theta-\theta_0)'\mathcal{I}(\hat\theta)(\hat\theta-\theta_0),\\
+  \xi_{LR} &= 2[\ell(\hat\theta)-\ell(\tilde\theta)],\\
+  \xi_{LM} &= \mathbf{s}(\tilde\theta)'\mathcal{I}(\tilde\theta)^{-1}
+              \mathbf{s}(\tilde\theta)/T,
+\end{align*}
+where $\tilde\theta$ is the restricted MLE (under $H_0$).
+For a one-dimensional $\theta$ the score has a normal CLT limit; for
+the multivariate case we need to collapse to one dimension, hence
+the chi-squared.
+
+\subsection{Asymptotic equivalence and the quadratic likelihood}
+
+When $\ell$ is well approximated by a quadratic (which holds for
+local alternatives as $n\to\infty$), all three tests are identical.
+If $\ell(\theta) = b - \frac{1}{2}(\theta-\hat\theta)A(\theta-\hat\theta)$
+exactly, then straightforward algebra gives
+$\xi_W = \xi_{LR} = \xi_{LM} = (\theta_0-\hat\theta)^2 A$.
+The asymptotic equivalence follows because the log-likelihood is
+asymptotically quadratic in a $1/\sqrt{n}$ neighbourhood of
+$\hat\theta$ (Engle 1984, Theorem~1).
+
+\begin{remark}[Why they differ in finite samples]
+The three statistics use different variance estimates:
+$\xi_W$ uses $\mathcal{I}(\hat\theta)$ (under $H_1$),
+$\xi_{LM}$ uses $\mathcal{I}(\tilde\theta)$ (under $H_0$),
+and $\xi_{LR}$ uses both implicitly.  For finite $n$ this produces
+$\xi_W \geq \xi_{LR} \geq \xi_{LM}$ (Breusch 1979; Savin 1976).
+Consequence: whenever LM rejects, so do the others; whenever W
+fails to reject, so do the others.  When sizes are corrected to be
+equal the power orderings flatten out.
+\end{remark}
+
+\subsection{Computational advantage of the LM test}
+
+The key practical reason to prefer the LM test is computational:
+\emph{only the restricted model needs to be estimated}.  This matters when:
+\begin{itemize}
+  \item the restricted model is simple (e.g.\ OLS) but the
+    unrestricted model requires iterative non-linear maximisation;
+  \item one wants a battery of diagnostic tests against many
+    alternatives --- each LM test reuses the same restricted
+    estimates;
+  \item the null has already been estimated and the question is
+    whether the data signal a departure.
+\end{itemize}
+For the Breusch--Pagan heteroscedasticity test, the null is OLS,
+and the LM statistic reduces to $nR^2$ of an auxiliary regression
+of squared residuals on $x$ --- no heteroscedastic model is fitted.
+
+\subsection{The score as a push-forward map}
+
+Figure~\ref{fig:img6} shows the score $s(x,\theta_0)$ as a function
+of $x$, overlaid on the density of $P_{\theta_0}$.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.62\textwidth]{figs/img6.png}
+\caption{The Probabilist's sketch (4~June~2026): score $s(x,\theta_0)$
+  (red line, increasing in $x$) overlaid on the density of
+  $P_{\theta_0}$ (green area, left bell) and on the density of
+  the pushed-forward image (right green area).
+  When the sampling measure is ``native'' ($P=P_{\theta_0}$),
+  the push-forward of $P_{\theta_0}$ under $x\mapsto s(x,\theta_0)$
+  is centred at zero.  This is the identity
+  $\mathbb{E}_{\theta_0}[s(\theta_0,X)]=0$.
+  In the unimodal case, when zero is near the mode of the score,
+  the score test works best: the score is approximately a
+  pivotal quantity whose distribution does not depend on $\mu$.}
+\label{fig:img6}
+\end{figure}
+
+Think of $x\mapsto s(x,\theta_0)$ as a \emph{centering map}: it
+pushes $P_{\theta_0}$ to a centred distribution (mean zero).
+When the data instead come from $P_{\theta_1}$ with
+$\theta_1\neq\theta_0$, the same map is applied to the
+``wrong'' measure.  The push-forward of $P_{\theta_1}$ will not be
+centred, and this off-centring is what the score test detects.
+
+Figure~\ref{fig:img7} shows this disagreement explicitly.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth]{figs/img7.png}
+\caption{The Probabilist's sketch (5~June~2026): score of the family
+  $\mathcal{N}(\theta,1)$, section at $\theta=\theta_0$
+  (the red line $s(x,\theta_0)=x-\theta_0$), overlaid on the
+  density of $\mathcal{N}(\theta_1,1)$ with $\theta_1>\theta_0$
+  (green bell curve centred at $\theta_1$).
+  The green area is shifted to the right of $\theta_0$: the
+  push-forward of $P_{\theta_1}$ under $s(\cdot,\theta_0)$
+  has positive mean $\theta_1-\theta_0$.
+  The label $\theta_1-\theta_0$ on the vertical axis shows the
+  shift of the push-forward measure away from zero.
+  The score test rejects $H_0$ when the sample mean of
+  $s(x_i,\theta_0)$ is far from zero relative to its standard
+  deviation.}
+\label{fig:img7}
+\end{figure}
+
+\begin{remark}[Two identities connected to zero]
+The score is tied to zero by two distinct identities which are easy
+to confuse:
+\begin{enumerate}[label=(\roman*)]
+  \item \textbf{Expectation identity} (under the true $\theta$):
+    $\mathbb{E}_\theta[s(\theta,X)] = 0$ for all $\theta$.
+    This is the LLN/CLT basis for the score test.
+  \item \textbf{First-order condition at the MLE}:
+    $s(\hat\theta,x) = 0$ for the observed sample.
+    This is a sample identity, not an expectation.
+\end{enumerate}
+The score test uses identity~(i) with $\theta=\theta_0$: under $H_0$
+the sample mean $\bar{s}(\theta_0)$ should be near zero (CLT).
+Identity~(ii) is not used: $\hat\theta$ does not appear in
+$\xi_{LM}$.
+
+The Probabilist's observation: we do reject $H_0$ when the mapped sample is
+far from the central position --- but ``far'' means the
+\emph{average} score $\bar{s}$ is far from zero (via CLT for
+identity~(i)), not that any individual $s(x_i,\theta_0)$ is large.
+\end{remark}
+
+%--------------------------------------------------------------------
+
+
+\end{document}

@@ -1,0 +1,335 @@
+\documentclass[a4paper,oneside,12pt]{extarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amssymb,amsthm,mathtools,enumitem,geometry,hyperref,booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathreplacing}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{float}
+
+\geometry{lmargin=15mm,rmargin=15mm,tmargin=10mm,bmargin=10mm,includeheadfoot}
+\pagestyle{plain}
+\frenchspacing
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}[proposition]{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}[proposition]{Definition}
+\newtheorem{example}[proposition]{Example}
+
+\theoremstyle{remark}
+\newtheorem{remark}[proposition]{Remark}
+
+\newcommand*{\E}{\mathbb{E}}
+\newcommand*{\Var}{\mathrm{Var}}
+\newcommand*{\mP}{\mathbb{P}}
+\newcommand*{\mR}{\mathbb{R}}
+\newcommand*{\ve}{\varepsilon}
+
+\begin{document}
+\begin{titlepage}
+\begin{center}
+
+{\footnotesize\scshape\color{gray}
+Working Notes in Quantitative Risk and Modeling
+}
+
+\vfill
+
+{\LARGE\bfseries Homoscedasticity and Its Testing:\\[4pt]
+From Conditional Expectation to the Breusch--Pagan Test}
+
+\vspace{36pt}
+
+{\normalsize Boris Garbuzov}
+
+\vfill
+
+{\Large\bfseries Part~4~/~12}
+
+\vspace{6pt}
+
+{\Large\bfseries Fisher Information: Two Routes to the Same Answer}
+
+\vfill
+
+{\small July 2026}
+
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%====================================================================
+\section{Fisher Information for $\mathcal{N}(\mu,1)$}
+%====================================================================
+
+\subsection{Definition and operator view}
+
+The \emph{Fisher information} is defined as the variance of the score:
+\[
+  \mathcal{I}(\theta)
+  \;=\; \Var_\theta\bigl[s(X,\theta)\bigr]
+  \;=\; \E_\theta\!\left[\left(\frac{\partial}{\partial\theta}
+        \log f(X;\theta)\right)^{\!2}\right]
+  \;=\; \int_{\mathbb{R}}
+        \!\left(\frac{\partial}{\partial\theta}\log f(x;\theta)\right)^{\!2}
+        f(x;\theta)\,dx.
+\]
+The last equality holds in the absolutely continuous case (Lebesgue
+density exists).  Since it is an expectation of a square,
+$\mathcal{I}(\theta)\ge 0$ always.
+
+Structurally, $\mathcal{I}$ is an operator on one-parametric families
+of measures: each family $\{P_\theta\}_{\theta\in\Theta}$ is mapped to
+a univariate function $\mathcal{I}(\cdot)\colon\Theta\to[0,\infty)$.
+The parameter space $\Theta$ must be a continuum because we need to
+differentiate in $\theta$.
+
+The picture below shows the toy case $\Theta=\{\theta_1,\theta_2,\theta_3\}$:
+a family of measures on the left maps to three scalar values on the right.
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf01_map_discrete.png}
+\end{center}
+
+When $\Theta$ is a continuum the output is a curve over $\theta$:
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf02_map_cont.png}
+\end{center}
+
+%====================================================================
+\subsection{Two routes to $\mathcal{I}$}
+
+In the \textbf{generic} (absolutely continuous) case the formula
+involves two operations: (1)~square the score, (2)~integrate against
+$f_\theta$:
+\[
+  \mathcal{I}(\theta) \;=\; \int_\mathbb{R} s^2(x,\theta)\,f_\theta(x)\,dx.
+\]
+Under \textbf{regularity conditions} (differentiation under the
+integral sign is valid) a third equivalent formula holds:
+\[
+  \mathcal{I}(\theta)
+  \;=\; -\E_\theta\!\left[\frac{\partial^2}{\partial\theta^2}
+        \ln L_x(\theta)\right]
+  \;=\; -\E_\theta\!\left[\frac{\partial}{\partial\theta}s_x(\theta)\right].
+\]
+This uses three operations: (1)~differentiate the score in $\theta$,
+(2)~integrate against $f_\theta$, (3)~negate.  We work out both for
+$\mathcal{N}(\mu,1)$.
+
+%====================================================================
+\subsection{Score surface and the pre-integrand $(x-\mu)^2$}
+
+For the location family $f_\mu(x)=\varphi(x-\mu)$:
+\[
+  \ell_x(\mu) = -\tfrac{1}{2}\ln(2\pi) - \tfrac{1}{2}(x-\mu)^2,
+  \qquad
+  s_x(\mu) = \frac{\partial\ell_x}{\partial\mu} = x-\mu.
+\]
+The pre-integrand for the generic formula is $(x-\mu)^2$ --- a
+perfect square.  The bivariate surface $(x-\mu)^2$ over the
+$(x,\mu)$-plane:
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf03_paraboloid_3d.png}
+\end{center}
+
+Fix $\mu=\mu_0$.  The green density $\varphi(x-\mu_0)$ is added
+as a section:
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf04_paraboloid_sections.png}
+\end{center}
+
+%====================================================================
+\subsection{Forming the pre-integral curve}
+
+At fixed $\mu_0$, the two factors in the integrand are
+$(x-\mu_0)^2$ (green, a parabola) and $\varphi(x-\mu_0)$ (black,
+a bell curve):
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf05_phi_parabola_2d.png}
+\end{center}
+
+Their product $(x-\mu_0)^2\cdot\varphi(x-\mu_0)$ is the
+pre-integral curve (red).  It is non-negative and Lebesgue
+integrable; its integral is $\mathcal{I}(\mu_0)$:
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf06_product_2d.png}
+\end{center}
+
+%====================================================================
+\subsection{Computing $\mathcal{I}_{\mathcal{N}(\mu,1)}(\mu)$
+via the generic route}
+
+Integrating with the substitution $y=x-\mu$:
+\[
+  \mathcal{I}_{\mathcal{N}(\mu,1)}(\mu)
+  = \int_{-\infty}^{\infty}(x-\mu)^2\,\varphi(x-\mu)\,dx
+  = \int_{-\infty}^{\infty}y^2\,\varphi(y)\,dy
+  = \Var(Z) = 1,\quad Z\sim\mathcal{N}(0,1).
+\]
+The result does not depend on $\mu$: $\mathcal{I}\equiv 1$ for this family.
+In general $\mathcal{I}(\theta)$ depends on $\theta$.
+
+%====================================================================
+%====================================================================
+\subsection{Regular route: the score surface and its derivative}
+
+The bivariate surface $s(x,\mu)=x-\mu$ over the $(x,\mu)$-plane,
+with two sections highlighted:
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf07_score_plane.png}
+\end{center}
+
+Section at fixed $\mu=x_1$ (score as a function of $x$) ---
+a line of slope $+1$ crossing zero at $x=x_1$:
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{nf08_score_line_x.png}
+\end{center}
+
+Now differentiate the score in $\mu$:
+\[
+  \frac{\partial}{\partial\mu}s(x,\mu)
+  = \frac{\partial}{\partial\mu}(x-\mu) = -1.
+\]
+Already at this level the result does not depend on $x$.
+The bivariate surface $\frac{\partial}{\partial\mu}s(x,\mu)\equiv -1$
+is a flat horizontal plane at height $-1$:
+
+\begin{center}
+\includegraphics[width=0.72\textwidth]{nf09_dscore_plane.png}
+\end{center}
+
+%====================================================================
+\subsection{Sections of the flat plane}
+
+Section at fixed $\mu=\mu_1$ (as a function of $x$) ---
+a horizontal line at $-1$, constant in $x$:
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{nf10_dscore_line_x.png}
+\end{center}
+
+Section at fixed $x=x_1$ (as a function of $\mu$) ---
+also a horizontal line at $-1$, constant in $\mu$:
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{nf11_dscore_line_mu.png}
+\end{center}
+
+%====================================================================
+\subsection{Product, negation, and the final result}
+
+The product $\frac{\partial}{\partial\mu}s(x,\mu)\cdot f_\mu(x)
+= (-1)\cdot\varphi(x-\mu)=-\varphi(x-\mu)$.
+At $\mu=\mu_1$ this is the negative density --- an upside-down bell:
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{nf12_neg_phi.png}
+\end{center}
+
+Negating gives $\varphi(x-\mu)$, a standard bell curve centred at
+$\mu_1$, which integrates to $1$:
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{nf13_pos_phi.png}
+\end{center}
+
+\[
+  \mathcal{I}(\mu)
+  = -\int_{-\infty}^{\infty}
+    \frac{\partial}{\partial\mu}s(x,\mu)\cdot\varphi(x-\mu)\,dx
+  = \int_{-\infty}^{\infty}\varphi(x-\mu)\,dx = 1.
+\]
+Both routes confirm $\mathcal{I}_{\mathcal{N}(\mu,1)}\equiv 1$.
+
+\paragraph{Summary.}
+
+\medskip
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Route & Operations & Result \\
+\midrule
+Generic  & square $s$, integrate            & $\int y^2\varphi(y)\,dy = 1$ \\
+Regular  & differentiate $s$, integrate, negate
+         & $-\int(-1)\varphi(x-\mu)\,dx = 1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%====================================================================
+\subsection{Existence of Fisher information and the information identity}
+
+\subsubsection*{Existence conditions}
+
+The definition $\mathcal{I}(\theta)=\E_\theta[s(X,\theta)^2]$ presupposes
+three things in sequence:
+\begin{enumerate}[label=(\arabic*),topsep=2pt,itemsep=1pt]
+  \item \textbf{Density exists.}  The family must be absolutely continuous,
+        so the likelihood $f(x;\theta)$ (Lebesgue density) is well-defined.
+  \item \textbf{Score exists.}  The density must be differentiable in
+        $\theta$ (at least a.e.\ in $x$), so that
+        $s(x,\theta)=\partial_\theta\ln f(x;\theta)$ makes sense.
+  \item \textbf{Score is square-integrable.}  The integral
+        $\int s(x,\theta)^2\,f(x;\theta)\,dx$ must be finite.
+        In the worst case it diverges: $\mathcal{I}(\theta)=+\infty$.
+\end{enumerate}
+
+\subsubsection*{Two functions with the same integral}
+
+Having worked through both routes we can now state the information
+identity geometrically.
+$\mathcal{I}(\theta)=\E_\theta[s^2]=-\E_\theta[\partial_\theta s]$
+says that two \emph{different} functions of $x$ have equal integrals
+against $f_\theta$.  For $\mathcal{N}(\mu,1)$ these are
+\[
+  g_1(x)=(x-\mu)^2\,\varphi(x-\mu),
+  \qquad
+  g_2(x)=\varphi(x-\mu),
+\]
+both integrating to $1$.  They look completely different ---
+$g_1$ is the two-humped product curve from Section~1.4,
+$g_2$ is just the standard bell from Section~1.8 ---
+yet their areas coincide.  Left panel: $g_1$ with $\varphi$ and
+$(x-\mu)^2$ shown separately; right panel: $g_2=\varphi(x-\mu_1)$
+at a fixed $\mu_1$.  Wire-frame and top-down views of the full
+bivariate surface $z=(x-\mu)^2\varphi(x-\mu)$ are shown below
+the 2D panels:
+
+\begin{center}
+\includegraphics[width=0.85\textwidth]{nf14_identity_side_by_side.png}
+\end{center}
+
+\subsubsection*{Blue-plane intersection: selecting the 2D curve}
+
+The surface $z=(x-\mu)^2\,\varphi(x-\mu)$ with a vertical blue plane
+at $\mu=\mu_0$.  The intersection of the red surface and the blue plane
+is exactly $g_1(\,\cdot\,;\mu_0)$; its integral equals $\mathcal{I}=1$:
+
+\begin{center}
+\includegraphics[width=0.70\textwidth]{nf16a_z_surface_blue1.png}
+\end{center}
+
+A second viewing angle of the same configuration:
+
+\begin{center}
+\includegraphics[width=0.70\textwidth]{nf16b_z_surface_blue2.png}
+\end{center}
+
+\end{document}
