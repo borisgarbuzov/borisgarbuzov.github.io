@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Homoscedasticity and Its Testing — Origins
+title: "Homoscedasticity and Its Testing: From Conditional Expectation to the Breusch–Pagan Test"
 ---
 
 These notes began as a favor. A friend — a quantitative analyst at a bank —
