@@ -84,6 +84,12 @@ squared error. Besides, notes cover some forecast foundations, comparing them to
 - [PDF](/assets/papers/cohort_component.pdf)
 - [TeX Source](/assets/papers/cohort_component.tex)
 
+### 3.2. Survival with a mass at infinity: from one person to mixed-age cohorts
+
+How many of today's participants in a training programme will finish, when, and how many never will? Built one step at a time, with a picture at each step: one person whose duration may be infinite; conditioning on time already spent (cut, shift, divide); one cohort and its counting process (binomial slices, thinning, covariance as a determinant); two people and two cohorts of different ages; a whole stock by age (Poisson binomial sums, mixture vs. convolution, large-stock limits). Then competing exits, the retirement outflow, and when simulation is and is not needed.
+
+- [PDF](/assets/papers/survival_mass_at_infinity.pdf)
+
 **What I'm working on now**
 
 A fuller treatment of homoscedasticity and the Breusch–Pagan test. That will likely be the next document in this series.
