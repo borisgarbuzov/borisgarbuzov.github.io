@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Notes
+title: AI-Assisted Notes. Corrections are welcome 
 permalink: /notes/
 ---
 
